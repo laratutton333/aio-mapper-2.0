@@ -49,7 +49,7 @@ export default function ComparisonPage() {
     const diff = target - avg;
     if (diff > 5)
       return (
-        <span className="flex items-center gap-1 text-chart-2">
+        <span className="flex items-center gap-1 text-success">
           <TrendingUp className="h-3 w-3" />
           Leading
         </span>
@@ -62,7 +62,7 @@ export default function ComparisonPage() {
         </span>
       );
     return (
-      <span className="flex items-center gap-1 text-muted-foreground">
+      <span className="flex items-center gap-1 text-warning">
         <Minus className="h-3 w-3" />
         On Par
       </span>

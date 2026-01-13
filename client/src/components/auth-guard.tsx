@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useDemo } from "@/context/demo-context";
 import { Loader2 } from "lucide-react";
@@ -9,24 +10,33 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const { isLoading, isAuthenticated } = useAuth();
   const { isDemo, setIsDemo } = useDemo();
+  const [checkedDemo, setCheckedDemo] = useState(false);
 
-  const checkDemoFromUrlOrStorage = () => {
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("demo") === "true") {
         sessionStorage.setItem("aio-demo-mode", "true");
         setIsDemo(true);
-        return true;
-      }
-      if (sessionStorage.getItem("aio-demo-mode") === "true") {
+      } else if (sessionStorage.getItem("aio-demo-mode") === "true") {
         setIsDemo(true);
-        return true;
       }
     }
-    return false;
-  };
+    setCheckedDemo(true);
+  }, [setIsDemo]);
 
-  if (isDemo || checkDemoFromUrlOrStorage()) {
+  if (!checkedDemo) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isDemo) {
     return <>{children}</>;
   }
 

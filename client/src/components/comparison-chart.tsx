@@ -45,6 +45,13 @@ export function ComparisonBarChart({ data, title, className }: ComparisonBarChar
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "6px",
                   fontSize: "12px",
+                  color: "hsl(var(--popover-foreground))",
+                }}
+                labelStyle={{
+                  color: "hsl(var(--popover-foreground))",
+                }}
+                itemStyle={{
+                  color: "hsl(var(--popover-foreground))",
                 }}
                 formatter={(value: number) => `${value.toFixed(1)}%`}
               />
@@ -90,6 +97,13 @@ export function TrendChart({ data, title, className }: TrendChartProps) {
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "6px",
                   fontSize: "12px",
+                  color: "hsl(var(--popover-foreground))",
+                }}
+                labelStyle={{
+                  color: "hsl(var(--popover-foreground))",
+                }}
+                itemStyle={{
+                  color: "hsl(var(--popover-foreground))",
                 }}
                 formatter={(value: number) => `${value.toFixed(1)}%`}
               />

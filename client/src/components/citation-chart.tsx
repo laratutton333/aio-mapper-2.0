@@ -85,6 +85,13 @@ export function CitationDonutChart({ data, title, className }: CitationDonutChar
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "6px",
                   fontSize: "12px",
+                  color: "hsl(var(--popover-foreground))",
+                }}
+                labelStyle={{
+                  color: "hsl(var(--popover-foreground))",
+                }}
+                itemStyle={{
+                  color: "hsl(var(--popover-foreground))",
                 }}
                 formatter={(value: number, name: string) => [
                   `${value} citations`,

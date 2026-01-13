@@ -191,9 +191,9 @@ export default function CitationsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Badge
-                      variant={citation.authorityScore > 0.7 ? "default" : "secondary"}
+                      variant={(citation.authorityScore ?? 0) > 0.7 ? "default" : "secondary"}
                     >
-                      {(citation.authorityScore * 100).toFixed(0)}%
+                      {((citation.authorityScore ?? 0) * 100).toFixed(0)}%
                     </Badge>
                   </TableCell>
                 </TableRow>

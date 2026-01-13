@@ -31,7 +31,7 @@ export function MetricCard({
 
   const getTrendColor = () => {
     if (!trend) return "";
-    if (trend.value > 0) return "text-chart-2";
+    if (trend.value > 0) return "text-success";
     if (trend.value < 0) return "text-destructive";
     return "text-muted-foreground";
   };
