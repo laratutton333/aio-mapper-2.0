@@ -147,7 +147,7 @@ export default function Pricing() {
             <Button variant="ghost" onClick={handleLogin} data-testid="button-pricing-login">
               Log In
             </Button>
-            <Link href="/app">
+            <Link href="/app?demo=true">
               <Button data-testid="button-pricing-demo">View Demo</Button>
             </Link>
           </div>

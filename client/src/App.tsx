@@ -8,6 +8,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuthGuard } from "@/components/auth-guard";
+import { DemoBanner } from "@/components/demo-banner";
+import { DemoProvider, useDemo } from "@/context/demo-context";
 import Dashboard from "@/pages/dashboard";
 import PromptsPage from "@/pages/prompts";
 import ComparisonPage from "@/pages/comparison";
@@ -52,23 +54,27 @@ function AppLayout() {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",
   };
+  const { isDemo } = useDemo();
 
   return (
     <AuthGuard>
-      <SidebarProvider style={sidebarStyle as React.CSSProperties}>
-        <div className="flex h-screen w-full">
-          <AppSidebar />
-          <div className="flex flex-col flex-1 min-w-0">
-            <header className="flex items-center justify-between gap-4 h-14 px-4 border-b border-border bg-background shrink-0">
-              <SidebarTrigger data-testid="button-sidebar-toggle" />
-              <ThemeToggle />
-            </header>
-            <main className="flex-1 overflow-auto p-8">
-              <AppRouter />
-            </main>
+      <div className="flex flex-col h-screen">
+        {isDemo && <DemoBanner />}
+        <SidebarProvider style={sidebarStyle as React.CSSProperties}>
+          <div className="flex flex-1 w-full min-h-0">
+            <AppSidebar />
+            <div className="flex flex-col flex-1 min-w-0">
+              <header className="flex items-center justify-between gap-4 h-14 px-4 border-b border-border bg-background shrink-0">
+                <SidebarTrigger data-testid="button-sidebar-toggle" />
+                <ThemeToggle />
+              </header>
+              <main className="flex-1 overflow-auto p-8">
+                <AppRouter />
+              </main>
+            </div>
           </div>
-        </div>
-      </SidebarProvider>
+        </SidebarProvider>
+      </div>
     </AuthGuard>
   );
 }
@@ -81,7 +87,9 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="aio-mapper-theme">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          {isAppRoute ? <AppLayout /> : <PublicRouter />}
+          <DemoProvider>
+            {isAppRoute ? <AppLayout /> : <PublicRouter />}
+          </DemoProvider>
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>

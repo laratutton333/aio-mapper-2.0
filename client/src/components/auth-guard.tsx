@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useDemo } from "@/context/demo-context";
 import { Loader2 } from "lucide-react";
 
 interface AuthGuardProps {
@@ -6,7 +7,13 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
+  const { isDemo } = useDemo();
+
+  // Allow demo mode access without authentication
+  if (isDemo) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (

@@ -123,7 +123,7 @@ export default function Landing() {
                 Start Free Trial
                 <ArrowRight className="h-4 w-4" />
               </Button>
-              <Link href="/app">
+              <Link href="/app?demo=true">
                 <Button size="lg" variant="outline" data-testid="button-hero-view-demo">
                   View Demo
                 </Button>

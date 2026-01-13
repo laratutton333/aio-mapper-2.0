@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import logoImage from "@assets/logo-128_1768327929037.png";
 import { useAuth } from "@/hooks/use-auth";
+import { useDemo } from "@/context/demo-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,6 +67,7 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { setOpenMobile } = useSidebar();
   const { user, logout, isLoggingOut } = useAuth();
+  const { isDemo, exitDemo } = useDemo();
 
   const handleNavClick = () => {
     setOpenMobile(false);
@@ -79,6 +81,7 @@ export function AppSidebar() {
   };
 
   const getUserInitials = () => {
+    if (isDemo) return "DU";
     if (user?.firstName && user?.lastName) {
       return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
     }
@@ -89,6 +92,7 @@ export function AppSidebar() {
   };
 
   const getUserDisplayName = () => {
+    if (isDemo) return "Demo User";
     if (user?.firstName && user?.lastName) {
       return `${user.firstName} ${user.lastName}`;
     }
@@ -96,6 +100,15 @@ export function AppSidebar() {
       return user.email.split("@")[0];
     }
     return "User";
+  };
+
+  const handleLogoutOrLogin = () => {
+    if (isDemo) {
+      exitDemo();
+      window.location.href = "/api/login";
+    } else {
+      logout();
+    }
   };
 
   return (
@@ -161,25 +174,27 @@ export function AppSidebar() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Avatar className="h-8 w-8 shrink-0">
-              {user?.profileImageUrl && <AvatarImage src={user.profileImageUrl} alt={getUserDisplayName()} />}
+              {!isDemo && user?.profileImageUrl && <AvatarImage src={user.profileImageUrl} alt={getUserDisplayName()} />}
               <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-medium text-sidebar-foreground truncate">
                 {getUserDisplayName()}
               </span>
-              {user?.email && (
+              {isDemo ? (
+                <span className="text-xs text-muted-foreground truncate">Demo Mode</span>
+              ) : user?.email ? (
                 <span className="text-xs text-muted-foreground truncate">{user.email}</span>
-              )}
+              ) : null}
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => logout()}
-            disabled={isLoggingOut}
-            data-testid="button-logout"
-            title="Log out"
+            onClick={handleLogoutOrLogin}
+            disabled={!isDemo && isLoggingOut}
+            data-testid={isDemo ? "button-login" : "button-logout"}
+            title={isDemo ? "Sign up" : "Log out"}
           >
             <LogOut className="h-4 w-4" />
           </Button>
