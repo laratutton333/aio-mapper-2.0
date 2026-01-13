@@ -10,6 +10,7 @@ import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { runPromptAnalysis, isOpenAIConfigured } from "./services/openai";
+import { getSamplePromptRunsData, getSampleCitationsData, getSampleRecommendationsData, getSamplePromptRunDetail } from "./sampleData";
 
 const checkoutSchema = z.object({
   priceId: z.string().min(1, "Price ID is required").startsWith("price_", "Invalid price ID format"),
@@ -39,10 +40,16 @@ export async function registerRoutes(
       const audits = await storage.getAllAudits();
       const audit = audits[0];
       if (!audit) {
-        return res.status(404).json({ error: "No audit found" });
+        // Return sample data when no audit exists
+        return res.json(getSamplePromptRunsData());
       }
 
       const runs = await storage.getPromptRunsByAudit(audit.id);
+      if (runs.length === 0) {
+        // Return sample data when no runs exist
+        return res.json(getSamplePromptRunsData());
+      }
+      
       const templates = await storage.getAllPromptTemplates();
 
       const runsWithDetails = await Promise.all(
@@ -72,6 +79,11 @@ export async function registerRoutes(
     try {
       const detail = await storage.getPromptRunDetail(req.params.id);
       if (!detail) {
+        // Try sample data
+        const sampleDetail = getSamplePromptRunDetail(req.params.id);
+        if (sampleDetail) {
+          return res.json(sampleDetail);
+        }
         return res.status(404).json({ error: "Prompt run not found" });
       }
       res.json(detail);
@@ -98,10 +110,16 @@ export async function registerRoutes(
       const audits = await storage.getAllAudits();
       const audit = audits[0];
       if (!audit) {
-        return res.status(404).json({ error: "No audit found" });
+        // Return sample data when no audit exists
+        return res.json(getSampleCitationsData());
       }
 
       const citations = await storage.getAllCitations(audit.id);
+      if (citations.length === 0) {
+        // Return sample data when no citations exist
+        return res.json(getSampleCitationsData());
+      }
+      
       const runs = await storage.getPromptRunsByAudit(audit.id);
 
       // Calculate distribution
@@ -145,10 +163,16 @@ export async function registerRoutes(
       const audits = await storage.getAllAudits();
       const audit = audits[0];
       if (!audit) {
-        return res.status(404).json({ error: "No audit found" });
+        // Return sample data when no audit exists
+        return res.json(getSampleRecommendationsData());
       }
 
       const recommendations = await storage.getRecommendationsByAudit(audit.id);
+      
+      if (recommendations.length === 0) {
+        // Return sample data when no recommendations exist
+        return res.json(getSampleRecommendationsData());
+      }
 
       const stats = {
         total: recommendations.length,
