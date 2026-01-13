@@ -71,7 +71,8 @@ Core entities defined in `shared/schema.ts`:
 ## External Dependencies
 
 ### Database
-- **PostgreSQL**: Primary data store configured via `DATABASE_URL` environment variable
+- **Supabase PostgreSQL**: Primary data store configured via `SUPABASE_DATABASE_URL` (falls back to `DATABASE_URL`)
+- **Connection**: SSL enabled automatically for Supabase connections in `server/db.ts`
 - **Drizzle Kit**: Database migrations in `./migrations` directory, push with `npm run db:push`
 - **Stripe schema**: Auto-managed by stripe-replit-sync (products, prices, subscriptions, customers)
 
