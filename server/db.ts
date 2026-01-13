@@ -4,13 +4,14 @@ import * as schema from "@shared/schema";
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
+const connectionString = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
+
+if (!connectionString) {
   throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
+    "DATABASE_URL or SUPABASE_DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-const connectionString = process.env.DATABASE_URL;
 const isSupabase = connectionString.includes('supabase') || connectionString.includes('pooler.supabase');
 
 export const pool = new Pool({ 
