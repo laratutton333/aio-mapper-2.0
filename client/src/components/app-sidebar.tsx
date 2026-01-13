@@ -19,6 +19,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const mainNavItems = [
@@ -59,11 +60,16 @@ const settingsNavItems = [
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const { setOpenMobile } = useSidebar();
+
+  const handleNavClick = () => {
+    setOpenMobile(false);
+  };
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3" onClick={handleNavClick}>
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <BarChart3 className="h-5 w-5" />
           </div>
@@ -87,7 +93,7 @@ export function AppSidebar() {
                     isActive={location === item.url}
                     data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={handleNavClick}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -110,7 +116,7 @@ export function AppSidebar() {
                     isActive={location === item.url}
                     data-testid={`nav-${item.title.toLowerCase()}`}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={handleNavClick}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
