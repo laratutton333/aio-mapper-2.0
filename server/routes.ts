@@ -152,8 +152,16 @@ export async function registerRoutes(
   app.patch("/api/recommendations/:id", async (req, res) => {
     try {
       const { status } = req.body;
+      const validStatuses = ["pending", "in_progress", "completed", "dismissed"];
+      
       if (!status) {
         return res.status(400).json({ error: "Status is required" });
+      }
+      
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` 
+        });
       }
 
       const updated = await storage.updateRecommendationStatus(req.params.id, status);
