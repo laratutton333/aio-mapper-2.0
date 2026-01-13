@@ -1,0 +1,44 @@
+14:55:05.527 Running build in Washington, D.C., USA (East) – iad1
+14:55:05.534 Build machine configuration: 2 cores, 8 GB
+14:55:05.847 Cloning github.com/laratutton333/aio-mapper-2.0 (Branch: main, Commit: 5402d99)
+14:55:07.313 Cloning completed: 1.465s
+14:55:07.520 Restored build cache from previous deployment (EYTvTBtcc26jFuEWhQCdMfMR9NGi)
+14:55:08.353 Running "vercel build"
+14:55:08.756 Vercel CLI 50.1.6
+14:55:09.469 > Installing Builder: @vercel/node@3.0.0
+14:55:20.176 Running "install" command: `npm install`...
+14:55:24.359 
+14:55:24.360 added 122 packages, changed 4 packages, and audited 619 packages in 4s
+14:55:24.360 
+14:55:24.360 82 packages are looking for funding
+14:55:24.361   run `npm fund` for details
+14:55:24.374 
+14:55:24.374 6 vulnerabilities (1 moderate, 5 high)
+14:55:24.374 
+14:55:24.375 To address issues that do not require attention, run:
+14:55:24.375   npm audit fix
+14:55:24.375 
+14:55:24.375 To address all issues (including breaking changes), run:
+14:55:24.375   npm audit fix --force
+14:55:24.375 
+14:55:24.376 Run `npm audit` for details.
+14:55:25.087 [36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+14:55:25.526 transforming...
+14:55:26.327 
+14:55:26.327 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+14:55:30.967 [32m✓[39m 2366 modules transformed.
+14:55:31.539 rendering chunks...
+14:55:31.557 computing gzip size...
+14:55:31.582 [2m../dist/public/[22m[32mindex.html                                  [39m[1m[2m  2.56 kB[22m[1m[22m[2m │ gzip:   0.98 kB[22m
+14:55:31.582 [2m../dist/public/[22m[2massets/[22m[32mlogo-64_1768327929037-C_okvcib.png   [39m[1m[2m  4.27 kB[22m[1m[22m
+14:55:31.583 [2m../dist/public/[22m[2massets/[22m[32mlogo-128_1768327929037-ow8jrp7O.png  [39m[1m[2m 10.16 kB[22m[1m[22m
+14:55:31.583 [2m../dist/public/[22m[2massets/[22m[35mindex-fJekvWgr.css                   [39m[1m[2m 92.18 kB[22m[1m[22m[2m │ gzip:  14.35 kB[22m
+14:55:31.583 [2m../dist/public/[22m[2massets/[22m[36mindex-C7iNbYQE.js                    [39m[1m[33m873.30 kB[39m[22m[2m │ gzip: 247.02 kB[22m
+14:55:31.584 [33m
+14:55:31.586 (!) Some chunks are larger than 500 kB after minification. Consider:
+14:55:31.587 - Using dynamic import() to code-split the application
+14:55:31.587 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+14:55:31.587 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+14:55:31.589 [32m✓ built in 6.47s[39m
+14:55:31.695 Error: Found invalid Node.js Version: "24.x". Please set Node.js Version to 18.x in your Project Settings to use Node.js 18.
+14:55:31.696 Learn More: http://vercel.link/node-version
