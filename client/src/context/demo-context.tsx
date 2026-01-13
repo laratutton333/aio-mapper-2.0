@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useLocation, useSearch } from "wouter";
 
 interface DemoContextType {
   isDemo: boolean;
@@ -9,22 +10,30 @@ interface DemoContextType {
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
 export function DemoProvider({ children }: { children: ReactNode }) {
+  const [location] = useLocation();
+  const searchString = useSearch();
+  
   const [isDemo, setIsDemo] = useState(() => {
-    // Check URL params on initial load
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("demo") === "true") {
         sessionStorage.setItem("aio-demo-mode", "true");
         return true;
       }
-      // Check session storage for persisted demo state
       return sessionStorage.getItem("aio-demo-mode") === "true";
     }
     return false;
   });
 
   useEffect(() => {
-    // Check URL on mount and whenever URL changes
+    const params = new URLSearchParams(searchString);
+    if (params.get("demo") === "true") {
+      setIsDemo(true);
+      sessionStorage.setItem("aio-demo-mode", "true");
+    }
+  }, [location, searchString]);
+
+  useEffect(() => {
     const checkDemoParam = () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get("demo") === "true") {
@@ -33,7 +42,6 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    checkDemoParam();
     window.addEventListener("popstate", checkDemoParam);
     return () => window.removeEventListener("popstate", checkDemoParam);
   }, []);

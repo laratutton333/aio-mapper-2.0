@@ -8,10 +8,25 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { isLoading, isAuthenticated } = useAuth();
-  const { isDemo } = useDemo();
+  const { isDemo, setIsDemo } = useDemo();
 
-  // Allow demo mode access without authentication
-  if (isDemo) {
+  const checkDemoFromUrlOrStorage = () => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("demo") === "true") {
+        sessionStorage.setItem("aio-demo-mode", "true");
+        setIsDemo(true);
+        return true;
+      }
+      if (sessionStorage.getItem("aio-demo-mode") === "true") {
+        setIsDemo(true);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (isDemo || checkDemoFromUrlOrStorage()) {
     return <>{children}</>;
   }
 
