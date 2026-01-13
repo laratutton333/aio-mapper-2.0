@@ -105,7 +105,7 @@ export function AppSidebar() {
   const handleLogoutOrLogin = () => {
     if (isDemo) {
       exitDemo();
-      window.location.href = "/pricing";
+      window.location.href = "/signup";
     } else {
       logout();
     }

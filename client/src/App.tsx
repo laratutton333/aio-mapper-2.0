@@ -20,6 +20,8 @@ import LandingPage from "@/pages/landing";
 import PricingPage from "@/pages/pricing";
 import TermsPage from "@/pages/terms";
 import PrivacyPage from "@/pages/privacy";
+import LoginPage from "@/pages/login";
+import SignupPage from "@/pages/signup";
 import NotFound from "@/pages/not-found";
 
 function AppRouter() {
@@ -42,6 +44,8 @@ function PublicRouter() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/pricing" component={PricingPage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/signup" component={SignupPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route component={NotFound} />

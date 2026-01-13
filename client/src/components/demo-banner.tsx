@@ -9,7 +9,7 @@ export function DemoBanner() {
 
   const handleLogin = () => {
     exitDemo();
-    window.location.href = "/pricing";
+    window.location.href = "/signup";
   };
 
   if (dismissed) return null;

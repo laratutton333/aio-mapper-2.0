@@ -61,7 +61,7 @@ export default function Landing() {
   ];
 
   const handleLogin = () => {
-    window.location.href = "/pricing";
+    window.location.href = "/login";
   };
 
   return (

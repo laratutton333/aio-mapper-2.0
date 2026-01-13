@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
+import { setupAuth, registerAuthRoutes } from "./auth";
 import { stripeService } from "./stripeService";
 import { stripeStorage } from "./stripeStorage";
 import { getStripePublishableKey } from "./stripeClient";
@@ -19,7 +19,7 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   // Setup authentication (must be before other routes)
-  await setupAuth(app);
+  setupAuth(app);
   registerAuthRoutes(app);
   // Dashboard data
   app.get("/api/dashboard", async (_req, res) => {
@@ -257,9 +257,10 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/stripe/checkout", async (req: any, res) => {
+  app.post("/api/stripe/checkout", async (req, res) => {
     try {
-      if (!req.user) {
+      const userId = req.session.userId;
+      if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
       
@@ -269,7 +270,7 @@ export async function registerRoutes(
       }
       const { priceId } = parsed.data;
 
-      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -295,13 +296,14 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/stripe/portal", async (req: any, res) => {
+  app.post("/api/stripe/portal", async (req, res) => {
     try {
-      if (!req.user) {
+      const userId = req.session.userId;
+      if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
       if (!user?.stripeCustomerId) {
         return res.status(400).json({ error: "No billing account found" });
       }
@@ -318,13 +320,14 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/stripe/subscription", async (req: any, res) => {
+  app.get("/api/stripe/subscription", async (req, res) => {
     try {
-      if (!req.user) {
+      const userId = req.session.userId;
+      if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
       if (!user?.stripeSubscriptionId) {
         return res.json({ subscription: null });
       }
