@@ -40,6 +40,7 @@ function PublicRouter() {
       <Route path="/pricing" component={PricingPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route component={NotFound} />
     </Switch>
   );
 }

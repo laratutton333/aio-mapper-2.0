@@ -164,7 +164,7 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
-              <div key={i} className="text-center">
+              <div key={i} className="text-center" data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>
                 <div className="text-3xl md:text-4xl font-bold text-primary">
                   {stat.value}
                 </div>
@@ -191,7 +191,7 @@ export default function Landing() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, i) => (
-              <Card key={i} className="hover-elevate">
+              <Card key={i} className="hover-elevate" data-testid={`feature-card-${i}`}>
                 <CardContent className="pt-6">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <feature.icon className="h-6 w-6 text-primary" />
@@ -264,7 +264,7 @@ export default function Landing() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((testimonial, i) => (
-              <Card key={i}>
+              <Card key={i} data-testid={`testimonial-card-${i}`}>
                 <CardContent className="pt-6">
                   <div className="flex gap-1 mb-4">
                     {[...Array(5)].map((_, j) => (
@@ -276,7 +276,7 @@ export default function Landing() {
                   </div>
                   <p className="text-sm mb-4">"{testimonial.quote}"</p>
                   <div>
-                    <div className="font-semibold text-sm">
+                    <div className="font-semibold text-sm" data-testid={`testimonial-author-${i}`}>
                       {testimonial.author}
                     </div>
                     <div className="text-xs text-muted-foreground">

@@ -155,6 +155,7 @@ export default function Pricing() {
               <Card
                 key={i}
                 className={`relative ${plan.popular ? "border-primary shadow-lg" : ""}`}
+                data-testid={`pricing-card-${plan.name.toLowerCase()}`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -241,9 +242,9 @@ export default function Pricing() {
           <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {faqs.map((faq, i) => (
-              <Card key={i}>
+              <Card key={i} data-testid={`faq-card-${i}`}>
                 <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-2">{faq.question}</h3>
+                  <h3 className="font-semibold mb-2" data-testid={`faq-question-${i}`}>{faq.question}</h3>
                   <p className="text-sm text-muted-foreground">{faq.answer}</p>
                 </CardContent>
               </Card>
