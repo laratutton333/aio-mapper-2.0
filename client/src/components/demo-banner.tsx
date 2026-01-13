@@ -9,7 +9,7 @@ export function DemoBanner() {
 
   const handleLogin = () => {
     exitDemo();
-    window.location.href = "/api/login";
+    window.location.href = "/pricing";
   };
 
   if (dismissed) return null;

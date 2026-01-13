@@ -21,7 +21,7 @@ export default function NotFound() {
             <Link href="/">
               <Button data-testid="button-go-home">
                 <Home className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                Back to Home
               </Button>
             </Link>
           </div>

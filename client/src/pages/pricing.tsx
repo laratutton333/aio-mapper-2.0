@@ -121,14 +121,14 @@ export default function Pricing() {
   ];
 
   const handleLogin = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/app?demo=true";
   };
 
   const handlePlanClick = (isEnterprise: boolean) => {
     if (isEnterprise) {
       window.location.href = "mailto:sales@aiomapper.com?subject=Enterprise%20Inquiry";
     } else {
-      window.location.href = "/api/login";
+      window.location.href = "/app?demo=true";
     }
   };
 
