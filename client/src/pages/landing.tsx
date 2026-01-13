@@ -122,7 +122,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/pricing">
                 <Button size="lg" className="gap-2" data-testid="button-hero-start-trial">
-                  Start Free Trial
+                  Try 20 Prompts Free
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -251,7 +251,7 @@ export default function Landing() {
               className="gap-2"
               data-testid="button-cta-start-free"
             >
-              Start Free Trial
+              Try 20 Prompts Free
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>

@@ -21,7 +21,7 @@ export default function Pricing() {
         "Basic recommendations",
         "Email support",
       ],
-      cta: "Start Free Trial",
+      cta: "Try 20 Prompts Free",
       popular: false,
     },
     {
@@ -41,7 +41,7 @@ export default function Pricing() {
         "Priority recommendations",
         "Priority email support",
       ],
-      cta: "Start Free Trial",
+      cta: "Try 20 Prompts Free",
       popular: true,
     },
     {
@@ -62,7 +62,7 @@ export default function Pricing() {
         "Custom integrations",
         "Dedicated account manager",
       ],
-      cta: "Start Free Trial",
+      cta: "Try 20 Prompts Free",
       popular: false,
     },
     {
@@ -91,7 +91,7 @@ export default function Pricing() {
   const faqs = [
     {
       question: "What's included in the free trial?",
-      answer: "Every paid plan includes a 14-day free trial with full access to all features. No credit card required to start.",
+      answer: "Every paid plan includes 20 free prompts to test the platform. No credit card required to start. Use your trial prompts to see real visibility data for your brand.",
     },
     {
       question: "Which AI platforms do you monitor?",
@@ -142,7 +142,7 @@ export default function Pricing() {
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your needs. All plans include a 14-day free trial.
+            Choose the plan that fits your needs. Try 20 prompts free on any plan.
           </p>
         </div>
       </section>
@@ -258,11 +258,11 @@ export default function Pricing() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-primary-foreground/80 mb-8">
-            Start your 14-day free trial. No credit card required.
+            Try 20 prompts free. No credit card required.
           </p>
           <div className="flex gap-4 justify-center">
             <Button size="lg" variant="secondary" data-testid="button-cta-trial">
-              Start Free Trial
+              Try 20 Prompts Free
             </Button>
             <Link href="/landing">
               <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
