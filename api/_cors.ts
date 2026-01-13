@@ -10,7 +10,11 @@ const ALLOWED_ORIGINS = [
 const isDevelopment = process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'development';
 
 export function setCorsHeaders(res: VercelResponse, origin: string | undefined): void {
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
   if (!origin) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     return;
   }
   
@@ -22,6 +26,9 @@ export function setCorsHeaders(res: VercelResponse, origin: string | undefined):
   
   if (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.replit.dev') || origin.endsWith('.replit.app') || origin.endsWith('.vercel.app')) {
     res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
 }
