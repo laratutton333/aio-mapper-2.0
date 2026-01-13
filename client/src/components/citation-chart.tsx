@@ -49,7 +49,25 @@ export function CitationDonutChart({ data, title, className }: CitationDonutChar
                 outerRadius={100}
                 paddingAngle={2}
                 dataKey="value"
-                label={({ name, percentage }) => `${percentage.toFixed(0)}%`}
+                label={({ cx, cy, midAngle, innerRadius, outerRadius, percentage }) => {
+                  const RADIAN = Math.PI / 180;
+                  const radius = innerRadius + (outerRadius - innerRadius) * 1.4;
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  return (
+                    <text
+                      x={x}
+                      y={y}
+                      fill="hsl(var(--foreground))"
+                      textAnchor={x > cx ? "start" : "end"}
+                      dominantBaseline="central"
+                      fontSize={12}
+                      fontWeight={500}
+                    >
+                      {`${percentage.toFixed(0)}%`}
+                    </text>
+                  );
+                }}
                 labelLine={false}
               >
                 {chartData.map((_, index) => (
