@@ -90,12 +90,12 @@ export default function Landing() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/">
+            <Link href="/app">
               <Button variant="ghost" data-testid="button-login">
                 Log In
               </Button>
             </Link>
-            <Link href="/pricing">
+            <Link href="/app">
               <Button data-testid="button-get-started">Get Started</Button>
             </Link>
           </div>
@@ -120,13 +120,13 @@ export default function Landing() {
               and actionable recommendations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/pricing">
+              <Link href="/app">
                 <Button size="lg" className="gap-2" data-testid="button-hero-start-trial">
-                  Try 20 Prompts Free
+                  Start Free Trial
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/">
+              <Link href="/app">
                 <Button size="lg" variant="outline" data-testid="button-hero-view-demo">
                   View Demo
                 </Button>
@@ -244,14 +244,14 @@ export default function Landing() {
             Start your free trial today and discover how AI search engines see
             your brand.
           </p>
-          <Link href="/pricing">
+          <Link href="/app">
             <Button
               size="lg"
               variant="secondary"
               className="gap-2"
               data-testid="button-cta-start-free"
             >
-              Try 20 Prompts Free
+              Start Free Trial
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>

@@ -22,12 +22,13 @@ import NotFound from "@/pages/not-found";
 function AppRouter() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/prompts" component={PromptsPage} />
-      <Route path="/comparison" component={ComparisonPage} />
-      <Route path="/citations" component={CitationsPage} />
-      <Route path="/recommendations" component={RecommendationsPage} />
-      <Route path="/settings" component={SettingsPage} />
+      <Route path="/app" component={Dashboard} />
+      <Route path="/app/dashboard" component={Dashboard} />
+      <Route path="/app/prompts" component={PromptsPage} />
+      <Route path="/app/comparison" component={ComparisonPage} />
+      <Route path="/app/citations" component={CitationsPage} />
+      <Route path="/app/recommendations" component={RecommendationsPage} />
+      <Route path="/app/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -36,7 +37,7 @@ function AppRouter() {
 function PublicRouter() {
   return (
     <Switch>
-      <Route path="/landing" component={LandingPage} />
+      <Route path="/" component={LandingPage} />
       <Route path="/pricing" component={PricingPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
@@ -71,14 +72,13 @@ function AppLayout() {
 
 function App() {
   const [location] = useLocation();
-  const publicRoutes = ["/landing", "/pricing", "/terms", "/privacy"];
-  const isPublicRoute = publicRoutes.some(route => location.startsWith(route));
+  const isAppRoute = location.startsWith("/app");
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="aio-mapper-theme">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          {isPublicRoute ? <PublicRouter /> : <AppLayout />}
+          {isAppRoute ? <AppLayout /> : <PublicRouter />}
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>

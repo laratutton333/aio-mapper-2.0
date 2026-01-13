@@ -25,27 +25,27 @@ import {
 const mainNavItems = [
   {
     title: "Overview",
-    url: "/",
+    url: "/app",
     icon: LayoutDashboard,
   },
   {
     title: "Prompt Explorer",
-    url: "/prompts",
+    url: "/app/prompts",
     icon: Search,
   },
   {
     title: "Brand vs Competitors",
-    url: "/comparison",
+    url: "/app/comparison",
     icon: Users,
   },
   {
     title: "Citations",
-    url: "/citations",
+    url: "/app/citations",
     icon: Link2,
   },
   {
     title: "Recommendations",
-    url: "/recommendations",
+    url: "/app/recommendations",
     icon: Lightbulb,
   },
 ];
@@ -53,7 +53,7 @@ const mainNavItems = [
 const settingsNavItems = [
   {
     title: "Settings",
-    url: "/settings",
+    url: "/app/settings",
     icon: Settings,
   },
 ];
@@ -66,10 +66,17 @@ export function AppSidebar() {
     setOpenMobile(false);
   };
 
+  const isActive = (url: string) => {
+    if (url === "/app") {
+      return location === "/app" || location === "/app/dashboard";
+    }
+    return location === url;
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <Link href="/" className="flex items-center gap-3" onClick={handleNavClick}>
+        <Link href="/app" className="flex items-center gap-3" onClick={handleNavClick}>
           <img src={logoImage} alt="AIO Mapper" className="h-9 w-9" />
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-sidebar-foreground">AIO Mapper</span>
@@ -88,7 +95,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={location === item.url}
+                    isActive={isActive(item.url)}
                     data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <Link href={item.url} onClick={handleNavClick}>
@@ -111,7 +118,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={location === item.url}
+                    isActive={isActive(item.url)}
                     data-testid={`nav-${item.title.toLowerCase()}`}
                   >
                     <Link href={item.url} onClick={handleNavClick}>
