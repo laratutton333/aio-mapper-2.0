@@ -49,11 +49,31 @@ Core entities defined in `shared/schema.ts`:
 - **Progressive Disclosure**: Summary metrics expand to detailed evidence breakdowns via slide-out drawers
 - **Theme Support**: Light/dark/system theme with CSS custom properties
 
+## Production Integrations
+
+### Authentication
+- **Replit Auth**: Google, GitHub, and email login via `server/replit_integrations/auth/`
+- **Session storage**: PostgreSQL-backed sessions via connect-pg-simple
+- **User table**: `shared/models/auth.ts` with stripeCustomerId/stripeSubscriptionId fields
+
+### AI Integration
+- **OpenAI**: Configured via Replit AI Integrations (gpt-5.1 model)
+- **Environment vars**: `AI_INTEGRATIONS_OPENAI_BASE_URL`, `AI_INTEGRATIONS_OPENAI_API_KEY`
+- **Usage**: Ready for brand visibility prompt analysis
+
+### Stripe Billing
+- **Products**: Starter (free), Pro ($49/mo), Enterprise ($199/mo)
+- **Files**: `server/stripeClient.ts`, `server/stripeService.ts`, `server/stripeStorage.ts`, `server/webhookHandlers.ts`
+- **Routes**: `/api/stripe/products`, `/api/stripe/checkout`, `/api/stripe/portal`, `/api/stripe/subscription`
+- **Webhooks**: Auto-configured via stripe-replit-sync, updates user subscription on checkout
+- **Seed script**: `scripts/seed-stripe-products.ts` (run with `npx tsx scripts/seed-stripe-products.ts`)
+
 ## External Dependencies
 
 ### Database
 - **PostgreSQL**: Primary data store configured via `DATABASE_URL` environment variable
 - **Drizzle Kit**: Database migrations in `./migrations` directory, push with `npm run db:push`
+- **Stripe schema**: Auto-managed by stripe-replit-sync (products, prices, subscriptions, customers)
 
 ### UI Libraries
 - **Radix UI**: Accessible component primitives (dialogs, dropdowns, tooltips, etc.)
