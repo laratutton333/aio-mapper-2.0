@@ -53,15 +53,16 @@ export default function Landing() {
     },
   ];
 
-  // Testimonials data - uncomment section below when real testimonials are available
-  // const testimonials = [...];
-
   const stats = [
     { value: "10+", label: "AI Platforms Tracked" },
     { value: "50K+", label: "Prompts Analyzed" },
     { value: "85%", label: "Avg. Visibility Improvement" },
     { value: "3x", label: "Faster Insights" },
   ];
+
+  const handleLogin = () => {
+    window.location.href = "/api/login";
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,12 +91,10 @@ export default function Landing() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/app">
-              <Button variant="ghost" data-testid="button-login">
-                Log In
-              </Button>
-            </Link>
-            <Link href="/app">
+            <Button variant="ghost" onClick={handleLogin} data-testid="button-login">
+              Log In
+            </Button>
+            <Link href="/pricing">
               <Button data-testid="button-get-started">Get Started</Button>
             </Link>
           </div>
@@ -120,12 +119,10 @@ export default function Landing() {
               and actionable recommendations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/app">
-                <Button size="lg" className="gap-2" data-testid="button-hero-start-trial">
-                  Start Free Trial
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button size="lg" className="gap-2" onClick={handleLogin} data-testid="button-hero-start-trial">
+                Start Free Trial
+                <ArrowRight className="h-4 w-4" />
+              </Button>
               <Link href="/app">
                 <Button size="lg" variant="outline" data-testid="button-hero-view-demo">
                   View Demo
@@ -228,12 +225,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials - hidden until we have real customer testimonials
-      <section className="py-20">
-        ...
-      </section>
-      */}
-
       {/* CTA Section */}
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
@@ -244,17 +235,16 @@ export default function Landing() {
             Start your free trial today and discover how AI search engines see
             your brand.
           </p>
-          <Link href="/app">
-            <Button
-              size="lg"
-              variant="secondary"
-              className="gap-2"
-              data-testid="button-cta-start-free"
-            >
-              Start Free Trial
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <Button
+            size="lg"
+            variant="secondary"
+            className="gap-2"
+            onClick={handleLogin}
+            data-testid="button-cta-start-free"
+          >
+            Start Free Trial
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       </section>
 

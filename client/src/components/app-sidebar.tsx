@@ -6,8 +6,12 @@ import {
   Link2,
   Lightbulb,
   Settings,
+  LogOut,
 } from "lucide-react";
 import logoImage from "@assets/logo-128_1768327929037.png";
+import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -61,6 +65,7 @@ const settingsNavItems = [
 export function AppSidebar() {
   const [location] = useLocation();
   const { setOpenMobile } = useSidebar();
+  const { user, logout, isLoggingOut } = useAuth();
 
   const handleNavClick = () => {
     setOpenMobile(false);
@@ -71,6 +76,26 @@ export function AppSidebar() {
       return location === "/app" || location === "/app/dashboard";
     }
     return location === url;
+  };
+
+  const getUserInitials = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return "U";
+  };
+
+  const getUserDisplayName = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user?.email) {
+      return user.email.split("@")[0];
+    }
+    return "User";
   };
 
   return (
@@ -133,14 +158,31 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-            <span className="text-xs font-medium">JD</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar className="h-8 w-8 shrink-0">
+              {user?.profileImageUrl && <AvatarImage src={user.profileImageUrl} alt={getUserDisplayName()} />}
+              <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium text-sidebar-foreground truncate">
+                {getUserDisplayName()}
+              </span>
+              {user?.email && (
+                <span className="text-xs text-muted-foreground truncate">{user.email}</span>
+              )}
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-sidebar-foreground">John Doe</span>
-            <span className="text-xs text-muted-foreground">Enterprise Plan</span>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => logout()}
+            disabled={isLoggingOut}
+            data-testid="button-logout"
+            title="Log out"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>

@@ -22,8 +22,9 @@ export default function Pricing() {
         "Basic recommendations",
         "Email support",
       ],
-      cta: "Try 20 Prompts Free",
+      cta: "Start Free Trial",
       popular: false,
+      isEnterprise: false,
     },
     {
       name: "Pro",
@@ -42,8 +43,9 @@ export default function Pricing() {
         "Priority recommendations",
         "Priority email support",
       ],
-      cta: "Try 20 Prompts Free",
+      cta: "Start Free Trial",
       popular: true,
+      isEnterprise: false,
     },
     {
       name: "Business",
@@ -63,8 +65,9 @@ export default function Pricing() {
         "Custom integrations",
         "Dedicated account manager",
       ],
-      cta: "Try 20 Prompts Free",
+      cta: "Start Free Trial",
       popular: false,
+      isEnterprise: false,
     },
     {
       name: "Enterprise",
@@ -86,6 +89,7 @@ export default function Pricing() {
       ],
       cta: "Contact Sales",
       popular: false,
+      isEnterprise: true,
     },
   ];
 
@@ -116,22 +120,34 @@ export default function Pricing() {
     },
   ];
 
+  const handleLogin = () => {
+    window.location.href = "/api/login";
+  };
+
+  const handlePlanClick = (isEnterprise: boolean) => {
+    if (isEnterprise) {
+      window.location.href = "mailto:sales@aiomapper.com?subject=Enterprise%20Inquiry";
+    } else {
+      window.location.href = "/api/login";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/landing">
+          <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
               <img src={logoImage} alt="AIO Mapper" className="h-8 w-8" />
               <span className="text-xl font-semibold">AIO Mapper</span>
             </div>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/">
-              <Button variant="ghost" data-testid="button-pricing-login">Log In</Button>
-            </Link>
-            <Link href="/">
+            <Button variant="ghost" onClick={handleLogin} data-testid="button-pricing-login">
+              Log In
+            </Button>
+            <Link href="/app">
               <Button data-testid="button-pricing-demo">View Demo</Button>
             </Link>
           </div>
@@ -143,7 +159,7 @@ export default function Pricing() {
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your needs. Try 20 prompts free on any plan.
+            Choose the plan that fits your needs. Start with a free trial on any plan.
           </p>
         </div>
       </section>
@@ -195,6 +211,7 @@ export default function Pricing() {
                   <Button
                     className="w-full"
                     variant={plan.popular ? "default" : "outline"}
+                    onClick={() => handlePlanClick(plan.isEnterprise)}
                     data-testid={`button-plan-${plan.name.toLowerCase()}`}
                   >
                     {plan.cta}
@@ -259,13 +276,13 @@ export default function Pricing() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-primary-foreground/80 mb-8">
-            Try 20 prompts free. No credit card required.
+            Start your free trial today. No credit card required.
           </p>
-          <div className="flex gap-4 justify-center">
-            <Button size="lg" variant="secondary" data-testid="button-cta-trial">
-              Try 20 Prompts Free
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Button size="lg" variant="secondary" onClick={handleLogin} data-testid="button-cta-trial">
+              Start Free Trial
             </Button>
-            <Link href="/landing">
+            <Link href="/">
               <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Home
