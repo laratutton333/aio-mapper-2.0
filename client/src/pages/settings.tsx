@@ -5,11 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTheme } from "@/components/theme-provider";
-import { Sun, Moon, Monitor, Building2, Globe, Bell, Download } from "lucide-react";
+import { useDemo } from "@/context/demo-context";
+import { Sun, Moon, Monitor, Building2, Globe, Bell, Download, Lock } from "lucide-react";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { isDemo } = useDemo();
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -19,6 +22,16 @@ export default function SettingsPage() {
           Configure your AIO Mapper preferences and integrations
         </p>
       </div>
+
+      {isDemo && (
+        <Alert>
+          <Lock className="h-4 w-4" />
+          <AlertDescription>
+            You're viewing the demo. Settings are read-only except for appearance preferences.
+            Sign up for a free account to customize your configuration.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
@@ -81,6 +94,7 @@ export default function SettingsPage() {
                 id="brand-name"
                 placeholder="Enter your brand name"
                 defaultValue="Acme Corp"
+                disabled={isDemo}
                 data-testid="input-brand-name"
               />
             </div>
@@ -90,6 +104,7 @@ export default function SettingsPage() {
                 id="primary-domain"
                 placeholder="example.com"
                 defaultValue="acmecorp.com"
+                disabled={isDemo}
                 data-testid="input-primary-domain"
               />
             </div>
@@ -101,7 +116,7 @@ export default function SettingsPage() {
               <Badge variant="secondary">Acme</Badge>
               <Badge variant="secondary">Acme Corp</Badge>
               <Badge variant="secondary">Acme Corporation</Badge>
-              <Button variant="outline" size="sm" data-testid="button-add-variant">
+              <Button variant="outline" size="sm" disabled={isDemo} data-testid="button-add-variant">
                 + Add Variant
               </Button>
             </div>
@@ -113,7 +128,7 @@ export default function SettingsPage() {
           <Separator />
 
           <div className="flex justify-end">
-            <Button data-testid="button-save-brand">Save Changes</Button>
+            <Button disabled={isDemo} data-testid="button-save-brand">Save Changes</Button>
           </div>
         </CardContent>
       </Card>
@@ -143,7 +158,7 @@ export default function SettingsPage() {
                   <p className="font-medium">{competitor.name}</p>
                   <p className="text-xs text-muted-foreground">{competitor.domain}</p>
                 </div>
-                <Button variant="ghost" size="sm" data-testid={`button-remove-competitor-${i}`}>
+                <Button variant="ghost" size="sm" disabled={isDemo} data-testid={`button-remove-competitor-${i}`}>
                   Remove
                 </Button>
               </div>
@@ -156,6 +171,7 @@ export default function SettingsPage() {
               <Input
                 id="new-competitor"
                 placeholder="Enter competitor name"
+                disabled={isDemo}
                 data-testid="input-new-competitor"
               />
             </div>
@@ -164,12 +180,13 @@ export default function SettingsPage() {
               <Input
                 id="competitor-domain"
                 placeholder="competitor.com"
+                disabled={isDemo}
                 data-testid="input-competitor-domain"
               />
             </div>
           </div>
 
-          <Button variant="outline" data-testid="button-add-competitor">
+          <Button variant="outline" disabled={isDemo} data-testid="button-add-competitor">
             Add Competitor
           </Button>
         </CardContent>
@@ -193,7 +210,7 @@ export default function SettingsPage() {
                 Get notified when visibility scores change significantly
               </p>
             </div>
-            <Switch defaultChecked data-testid="switch-visibility-alerts" />
+            <Switch defaultChecked disabled={isDemo} data-testid="switch-visibility-alerts" />
           </div>
 
           <Separator />
@@ -205,7 +222,7 @@ export default function SettingsPage() {
                 Receive a weekly summary of your AI visibility metrics
               </p>
             </div>
-            <Switch defaultChecked data-testid="switch-weekly-reports" />
+            <Switch defaultChecked disabled={isDemo} data-testid="switch-weekly-reports" />
           </div>
 
           <Separator />
@@ -217,7 +234,7 @@ export default function SettingsPage() {
                 Get notified when new optimization recommendations are available
               </p>
             </div>
-            <Switch defaultChecked data-testid="switch-new-recommendations" />
+            <Switch defaultChecked disabled={isDemo} data-testid="switch-new-recommendations" />
           </div>
         </CardContent>
       </Card>
@@ -234,13 +251,13 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" data-testid="button-export-csv">
+            <Button variant="outline" disabled={isDemo} data-testid="button-export-csv">
               Export as CSV
             </Button>
-            <Button variant="outline" data-testid="button-export-json">
+            <Button variant="outline" disabled={isDemo} data-testid="button-export-json">
               Export as JSON
             </Button>
-            <Button variant="outline" data-testid="button-export-pdf">
+            <Button variant="outline" disabled={isDemo} data-testid="button-export-pdf">
               Generate PDF Report
             </Button>
           </div>
