@@ -10,9 +10,7 @@ import {
   Zap,
   Target,
   LineChart,
-  CheckCircle2,
   ArrowRight,
-  Star,
 } from "lucide-react";
 
 export default function Landing() {
@@ -55,29 +53,8 @@ export default function Landing() {
     },
   ];
 
-  const testimonials = [
-    {
-      quote:
-        "AIO Mapper helped us understand why we were invisible in AI search. Within 3 months, our visibility score jumped 40%.",
-      author: "Sarah Chen",
-      role: "VP of Marketing",
-      company: "TechScale Inc.",
-    },
-    {
-      quote:
-        "The competitive analysis is invaluable. We now know exactly where our competitors are winning in AI answers.",
-      author: "Michael Torres",
-      role: "Head of SEO",
-      company: "GrowthLabs",
-    },
-    {
-      quote:
-        "Finally, a tool that explains AI visibility in terms we can actually act on. The ROI has been incredible.",
-      author: "Emily Watson",
-      role: "CMO",
-      company: "Nexus Digital",
-    },
-  ];
+  // Testimonials data - uncomment section below when real testimonials are available
+  // const testimonials = [...];
 
   const stats = [
     { value: "10+", label: "AI Platforms Tracked" },
@@ -251,44 +228,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials - hidden until we have real customer testimonials
       <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Trusted by Marketing Teams
-            </h2>
-            <p className="text-muted-foreground">
-              See what our customers say about AIO Mapper.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, i) => (
-              <Card key={i} data-testid={`testimonial-card-${i}`}>
-                <CardContent className="pt-6">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(5)].map((_, j) => (
-                      <Star
-                        key={j}
-                        className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-sm mb-4">"{testimonial.quote}"</p>
-                  <div>
-                    <div className="font-semibold text-sm" data-testid={`testimonial-author-${i}`}>
-                      {testimonial.author}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {testimonial.role}, {testimonial.company}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        ...
       </section>
+      */}
 
       {/* CTA Section */}
       <section className="py-20 bg-primary text-primary-foreground">
