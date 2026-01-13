@@ -1,7 +1,5 @@
 import { randomUUID } from "crypto";
 import type {
-  User,
-  InsertUser,
   Brand,
   InsertBrand,
   Audit,
@@ -26,10 +24,6 @@ import type {
 } from "@shared/schema";
 
 export interface IStorage {
-  // Users
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
 
   // Brands
   getBrand(id: string): Promise<Brand | undefined>;
@@ -91,7 +85,6 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
   private brands: Map<string, Brand>;
   private audits: Map<string, Audit>;
   private competitors: Map<string, Competitor>;
@@ -103,7 +96,6 @@ export class MemStorage implements IStorage {
   private recommendations: Map<string, Recommendation>;
 
   constructor() {
-    this.users = new Map();
     this.brands = new Map();
     this.audits = new Map();
     this.competitors = new Map();
@@ -440,22 +432,6 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
       },
     ];
     recommendations.forEach((r) => this.recommendations.set(r.id, r));
-  }
-
-  // User methods
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find((user) => user.username === username);
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
   }
 
   // Brand methods

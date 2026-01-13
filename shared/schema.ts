@@ -196,17 +196,8 @@ export interface ComparisonData {
   compositeScore: number;
 }
 
-// Legacy user schema for auth compatibility
-export const users = pgTable("users", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
+// Re-export auth models (required for Replit Auth integration)
+export * from "./models/auth";
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+// Re-export chat models (required for OpenAI chat integration)
+export * from "./models/chat";
