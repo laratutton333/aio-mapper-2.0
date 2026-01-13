@@ -105,14 +105,15 @@ function getDashboardData() {
   const recommendationRate = completedPrompts > 0 ? (primaryMentions / completedPrompts) * 0.925 : 0;
   const visibilityScore = (presenceRate * 0.3 + citationRate * 0.35 + recommendationRate * 0.35);
 
-  // Generate trend data
+  // Generate fixed trend data (no randomness for consistent demo)
+  const baseScores = [72.5, 74.2, 71.8, 76.3, 78.1, 75.9, 79.2];
   const trend: { date: string; score: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     trend.push({
       date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      score: Math.round((70 + Math.random() * 15) * 10) / 10,
+      score: baseScores[6 - i],
     });
   }
 
@@ -155,8 +156,11 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const data = getDashboardData();
     return res.status(200).json(data);
-  } catch (error) {
-    console.error('Dashboard error:', error);
-    return res.status(500).json({ error: 'Failed to load dashboard data' });
+  } catch (error: any) {
+    console.error('Dashboard error:', error?.message || error);
+    return res.status(500).json({ 
+      error: 'Failed to load dashboard data',
+      details: error?.message || 'Unknown error'
+    });
   }
 }
