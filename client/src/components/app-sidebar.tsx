@@ -6,8 +6,8 @@ import {
   Link2,
   Lightbulb,
   Settings,
-  BarChart3,
 } from "lucide-react";
+import logoImage from "@assets/logo-128_1768327929037.png";
 import {
   Sidebar,
   SidebarContent,
@@ -70,9 +70,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-3" onClick={handleNavClick}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <BarChart3 className="h-5 w-5" />
-          </div>
+          <img src={logoImage} alt="AIO Mapper" className="h-9 w-9" />
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-sidebar-foreground">AIO Mapper</span>
             <span className="text-xs text-muted-foreground">AI Visibility Intelligence</span>

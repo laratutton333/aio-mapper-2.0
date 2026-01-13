@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { Check, LineChart, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
+import logoImage from "@assets/logo-64_1768327929037.png";
 
 export default function Pricing() {
   const plans = [
@@ -122,7 +123,7 @@ export default function Pricing() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/landing">
             <div className="flex items-center gap-2 cursor-pointer">
-              <LineChart className="h-6 w-6 text-primary" />
+              <img src={logoImage} alt="AIO Mapper" className="h-8 w-8" />
               <span className="text-xl font-semibold">AIO Mapper</span>
             </div>
           </Link>
@@ -279,7 +280,7 @@ export default function Pricing() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <LineChart className="h-5 w-5 text-primary" />
+              <img src={logoImage} alt="AIO Mapper" className="h-6 w-6" />
               <span className="font-semibold">AIO Mapper</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
