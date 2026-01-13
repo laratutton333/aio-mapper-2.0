@@ -87,8 +87,17 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const data = getRecommendationsData();
-    return res.status(200).json(data);
+    const recommendations = getRecommendationsData();
+    
+    // Calculate stats as expected by the client
+    const stats = {
+      total: recommendations.length,
+      pending: recommendations.filter(r => r.status === "pending").length,
+      inProgress: recommendations.filter(r => r.status === "in_progress").length,
+      completed: recommendations.filter(r => r.status === "completed").length,
+    };
+    
+    return res.status(200).json({ recommendations, stats });
   } catch (error) {
     console.error('Recommendations error:', error);
     return res.status(500).json({ error: 'Failed to load recommendations data' });
