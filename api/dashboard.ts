@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { setCorsHeaders } from './_cors';
 
 // In-memory storage for demo data
 function getDashboardData() {
@@ -105,7 +106,7 @@ function getDashboardData() {
   const visibilityScore = (presenceRate * 0.3 + citationRate * 0.35 + recommendationRate * 0.35);
 
   // Generate trend data
-  const trend = [];
+  const trend: { date: string; score: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
@@ -144,7 +145,7 @@ function getDashboardData() {
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  setCorsHeaders(res, req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   
   if (req.method === 'OPTIONS') {

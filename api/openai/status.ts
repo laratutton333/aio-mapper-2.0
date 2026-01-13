@@ -9,8 +9,6 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // Return demo publishable key (this would be a real key in production)
-  return res.status(200).json({ 
-    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || "pk_test_demo" 
-  });
+  const configured = !!(process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY);
+  return res.status(200).json({ configured });
 }

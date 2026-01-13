@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { setCorsHeaders } from './_cors';
 
 function getCitationsData() {
   const citations = [
@@ -12,8 +13,10 @@ function getCitationsData() {
     { id: "cit-8", promptRunId: "run-6", sourceUrl: "https://www.capterra.com/project-management-software", sourceType: "publisher", authorityScore: 0.80, sourceDomain: "capterra.com" },
   ];
 
+  const totalCitations = citations.length;
+  
   // Group by source type
-  const byType: Record<string, any[]> = {};
+  const byType: Record<string, typeof citations> = {};
   citations.forEach((cit) => {
     if (!byType[cit.sourceType]) {
       byType[cit.sourceType] = [];
@@ -21,18 +24,35 @@ function getCitationsData() {
     byType[cit.sourceType].push(cit);
   });
 
-  // Calculate stats
-  const typeStats = Object.entries(byType).map(([type, cits]) => ({
+  // Calculate distribution stats (what client expects)
+  const distribution = Object.entries(byType).map(([type, cits]) => ({
     type,
     count: cits.length,
-    avgAuthority: cits.reduce((sum, c) => sum + c.authorityScore, 0) / cits.length,
+    percentage: (cits.length / totalCitations) * 100,
   }));
 
-  return { citations, byType: typeStats };
+  // Calculate brand owned percentage
+  const brandOwnedCount = byType["brand_owned"]?.length || 0;
+  const brandOwnedPercentage = (brandOwnedCount / totalCitations) * 100;
+
+  // Calculate average authority score
+  const authorityAverage = citations.reduce((sum, c) => sum + c.authorityScore, 0) / totalCitations;
+
+  // Count prompts without citations (mock: 2 prompts without)
+  const missingCitationPrompts = 2;
+
+  return { 
+    citations, 
+    distribution,
+    totalCitations,
+    brandOwnedPercentage,
+    authorityAverage,
+    missingCitationPrompts,
+  };
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  setCorsHeaders(res, req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   
   if (req.method === 'OPTIONS') {

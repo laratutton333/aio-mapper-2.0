@@ -9,6 +9,7 @@ import { db } from "./db";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { runPromptAnalysis, isOpenAIConfigured } from "./services/openai";
 
 const checkoutSchema = z.object({
   priceId: z.string().min(1, "Price ID is required").startsWith("price_", "Invalid price ID format"),
@@ -210,6 +211,89 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Templates error:", error);
       res.status(500).json({ error: "Failed to load templates" });
+    }
+  });
+
+  // Check if OpenAI is configured
+  app.get("/api/openai/status", async (_req, res) => {
+    res.json({ configured: isOpenAIConfigured() });
+  });
+
+  // Analyze a prompt with OpenAI
+  app.post("/api/analyze-prompt", async (req, res) => {
+    try {
+      if (!isOpenAIConfigured()) {
+        return res.status(500).json({ error: "OpenAI API key not configured" });
+      }
+
+      const {
+        promptText,
+        targetBrand = "Acme Corp",
+        brandVariants = ["Acme", "Acme Corporation"],
+        competitorBrands = ["TechCo", "InnovateLabs", "NextGen Solutions"],
+        brandDomain = "acmecorp.com",
+        competitorDomains = ["techco.com", "innovatelabs.io", "nextgen.com"],
+        model = "gpt-4o-mini",
+      } = req.body;
+
+      if (!promptText) {
+        return res.status(400).json({ error: "promptText is required" });
+      }
+
+      const result = await runPromptAnalysis(
+        promptText,
+        targetBrand,
+        brandVariants,
+        competitorBrands,
+        brandDomain,
+        competitorDomains,
+        model
+      );
+
+      const targetMentions = result.mentions.filter(m => m.isTargetBrand);
+      const primaryMentions = targetMentions.filter(m => m.matchType === "primary");
+
+      const metrics = {
+        presenceRate: targetMentions.length > 0 ? 1 : 0,
+        recommendationRate: primaryMentions.length > 0 
+          ? primaryMentions.length / Math.max(targetMentions.length, 1) 
+          : 0,
+        citationRate: result.citations.length > 0 
+          ? result.citations.filter(c => c.sourceType === "brand_owned").length / result.citations.length 
+          : 0,
+        authorityDiversity: result.citations.length > 0 
+          ? Array.from(new Set(result.citations.map(c => c.sourceType))).length / 6 
+          : 0,
+        compositeScore: 0,
+      };
+
+      metrics.compositeScore = (
+        metrics.presenceRate * 0.3 +
+        metrics.recommendationRate * 0.3 +
+        metrics.citationRate * 0.2 +
+        metrics.authorityDiversity * 0.2
+      );
+
+      res.json({
+        success: true,
+        rawAnswer: result.rawAnswer,
+        mentions: result.mentions.map((m, i) => ({
+          ...m,
+          id: `mention-live-${i}`,
+        })),
+        citations: result.citations.map((c, i) => ({
+          ...c,
+          id: `cit-live-${i}`,
+        })),
+        metrics,
+        tokenUsage: result.tokenUsage,
+      });
+    } catch (error: any) {
+      console.error("Analyze prompt error:", error);
+      res.status(500).json({
+        error: "Failed to analyze prompt",
+        message: error.message || "Unknown error",
+      });
     }
   });
 
