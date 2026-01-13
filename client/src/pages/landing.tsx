@@ -9,6 +9,7 @@ import {
   Zap,
   Target,
   ArrowRight,
+  BarChart3,
 } from "lucide-react";
 import logoImage from "@assets/logo-64_1768327929037.png";
 
