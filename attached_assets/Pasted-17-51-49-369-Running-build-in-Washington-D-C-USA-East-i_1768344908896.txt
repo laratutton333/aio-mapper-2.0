@@ -1,0 +1,63 @@
+17:51:49.369 Running build in Washington, D.C., USA (East) – iad1
+17:51:49.370 Build machine configuration: 2 cores, 8 GB
+17:51:49.515 Cloning github.com/laratutton333/aio-mapper-2.0 (Branch: main, Commit: 1137c36)
+17:51:50.084 Cloning completed: 569.000ms
+17:51:50.465 Restored build cache from previous deployment (AtzvANYdNdzUZYMNk64bQpipE8bV)
+17:51:50.826 Running "vercel build"
+17:51:51.244 Vercel CLI 50.1.6
+17:51:52.231 Running "install" command: `npm install`...
+17:51:54.814 
+17:51:54.815 up to date, audited 630 packages in 2s
+17:51:54.815 
+17:51:54.816 82 packages are looking for funding
+17:51:54.816   run `npm fund` for details
+17:51:54.832 
+17:51:54.833 6 vulnerabilities (1 moderate, 5 high)
+17:51:54.833 
+17:51:54.833 To address issues that do not require attention, run:
+17:51:54.834   npm audit fix
+17:51:54.834 
+17:51:54.834 To address all issues (including breaking changes), run:
+17:51:54.834   npm audit fix --force
+17:51:54.834 
+17:51:54.834 Run `npm audit` for details.
+17:51:55.596 [36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+17:51:55.957 transforming...
+17:51:57.297 
+17:51:57.298 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+17:52:03.621 [32m✓[39m 2493 modules transformed.
+17:52:04.406 rendering chunks...
+17:52:04.422 computing gzip size...
+17:52:04.452 [2m../dist/public/[22m[32mindex.html                                  [39m[1m[2m    2.56 kB[22m[1m[22m[2m │ gzip:   0.98 kB[22m
+17:52:04.452 [2m../dist/public/[22m[2massets/[22m[32mlogo-64_1768327929037-C_okvcib.png   [39m[1m[2m    4.27 kB[22m[1m[22m
+17:52:04.452 [2m../dist/public/[22m[2massets/[22m[32mlogo-128_1768327929037-ow8jrp7O.png  [39m[1m[2m   10.16 kB[22m[1m[22m
+17:52:04.453 [2m../dist/public/[22m[2massets/[22m[35mindex-C9NKiUFr.css                   [39m[1m[2m   92.28 kB[22m[1m[22m[2m │ gzip:  14.42 kB[22m
+17:52:04.453 [2m../dist/public/[22m[2massets/[22m[36mindex-B5udU00C.js                    [39m[1m[33m1,015.51 kB[39m[22m[2m │ gzip: 285.64 kB[22m
+17:52:04.453 [33m
+17:52:04.453 (!) Some chunks are larger than 500 kB after minification. Consider:
+17:52:04.453 - Using dynamic import() to code-split the application
+17:52:04.453 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+17:52:04.454 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+17:52:04.454 [32m✓ built in 8.54s[39m
+17:52:04.534 Installing dependencies...
+17:52:05.863 
+17:52:05.864 up to date in 1s
+17:52:05.864 
+17:52:05.864 82 packages are looking for funding
+17:52:05.864   run `npm fund` for details
+17:52:06.192 Using TypeScript 5.6.3 (local user-provided)
+17:52:11.265 Using TypeScript 5.6.3 (local user-provided)
+17:52:11.598 Using TypeScript 5.6.3 (local user-provided)
+17:52:11.901 Using TypeScript 5.6.3 (local user-provided)
+17:52:12.224 Using TypeScript 5.6.3 (local user-provided)
+17:52:12.584 Using TypeScript 5.6.3 (local user-provided)
+17:52:13.762 Using TypeScript 5.6.3 (local user-provided)
+17:52:14.089 Using TypeScript 5.6.3 (local user-provided)
+17:52:14.367 Using TypeScript 5.6.3 (local user-provided)
+17:52:14.702 Using TypeScript 5.6.3 (local user-provided)
+17:52:15.008 Using TypeScript 5.6.3 (local user-provided)
+17:52:15.284 Using TypeScript 5.6.3 (local user-provided)
+17:52:15.563 Using TypeScript 5.6.3 (local user-provided)
+17:52:15.827 Build Completed in /vercel/output [24s]
+17:52:15.944 Deploying outputs...
+17:52:16.837 Error: No more than 12 Serverless Functions can be added to a Deployment on the Hobby plan. Create a team (Pro plan) to deploy more. Learn More: https://vercel.link/function-count-limit
