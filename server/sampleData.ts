@@ -238,11 +238,23 @@ export function getSampleRecommendationsData() {
   return { recommendations, stats };
 }
 
+const FIXED_METRICS = [
+  { presenceRate: 0.92, recommendationRate: 0.85, citationRate: 0.78, authorityDiversity: 0.82, compositeScore: 0.84 },
+  { presenceRate: 0.88, recommendationRate: 0.80, citationRate: 0.65, authorityDiversity: 0.75, compositeScore: 0.77 },
+  { presenceRate: 0.75, recommendationRate: 0.60, citationRate: 0.55, authorityDiversity: 0.70, compositeScore: 0.65 },
+  { presenceRate: 0.95, recommendationRate: 0.90, citationRate: 0.85, authorityDiversity: 0.88, compositeScore: 0.90 },
+  { presenceRate: 0.85, recommendationRate: 0.75, citationRate: 0.60, authorityDiversity: 0.72, compositeScore: 0.73 },
+  { presenceRate: 0.90, recommendationRate: 0.88, citationRate: 0.80, authorityDiversity: 0.85, compositeScore: 0.86 },
+];
+
 export function getSamplePromptRunDetail(runId: string) {
   const data = getSamplePromptRunsData();
   const item = data.runs.find(r => r.run.id === runId);
   
   if (!item) return null;
+  
+  const runIndex = parseInt(runId.replace('run-', '')) - 1;
+  const metricsData = FIXED_METRICS[runIndex] || FIXED_METRICS[0];
   
   return {
     run: item.run,
@@ -252,11 +264,7 @@ export function getSamplePromptRunDetail(runId: string) {
     metrics: {
       id: `metric-${runId}`,
       promptRunId: runId,
-      presenceRate: 0.85 + Math.random() * 0.1,
-      recommendationRate: 0.75 + Math.random() * 0.15,
-      citationRate: 0.6 + Math.random() * 0.2,
-      authorityDiversity: 0.7 + Math.random() * 0.2,
-      compositeScore: 0.75 + Math.random() * 0.1,
+      ...metricsData,
     },
   };
 }
