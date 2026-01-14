@@ -1,16 +1,12 @@
 {
-  "buildCommand": "npx vite build --config vite.config.vercel.ts",
-  "outputDirectory": "dist/public",
-  "installCommand": "npm install",
-  "framework": null,
-  "functions": {
-    "api/server.ts": {
-      "runtime": "nodejs20.x"
+  "builds": [
+    {
+      "src": "api/server.ts",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/server.ts" },
-    { "src": "/__server_alive", "dest": "/api/server.ts" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
