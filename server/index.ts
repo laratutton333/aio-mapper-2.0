@@ -9,6 +9,10 @@ import { WebhookHandlers } from "./webhookHandlers";
 const app = express();
 const httpServer = createServer(app);
 
+app.get("/__server_alive", (_req, res) => {
+  res.status(200).send("express is running");
+});
+
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
