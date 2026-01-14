@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { setCorsHeaders } from "../_cors";
-import { buildDemoUser } from "./demo-user";
+import { setCorsHeaders } from "../../serverless/cors";
+import { buildDemoUser } from "../../serverless/demo-user";
 
 function sendMethodNotAllowed(res: VercelResponse) {
   res.status(405).json({ error: "Method not allowed" });

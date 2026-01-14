@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import OpenAI from "openai";
-import { setCorsHeaders } from "./_cors";
+import { setCorsHeaders } from "../serverless/cors";
 import {
   computeRecommendationStats,
   getCitationsData,
@@ -13,7 +13,7 @@ import {
   getStripeProducts,
   getStripePublishableKey,
   getStripeSubscription,
-} from "./lib/demo-data";
+} from "../serverless/demo-data";
 
 const openai = new OpenAI({
   apiKey:
