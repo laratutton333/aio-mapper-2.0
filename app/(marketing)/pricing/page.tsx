@@ -168,7 +168,7 @@ export default function PricingPage() {
         "Summary reports",
         "Community support"
       ],
-      cta: { label: "Get Started Free", href: "/dashboard", variant: "outline" }
+      cta: { label: "Get Started Free", href: "/account", variant: "outline" }
     },
     {
       name: "Starter",
@@ -324,4 +324,3 @@ export default function PricingPage() {
     </div>
   );
 }
-
