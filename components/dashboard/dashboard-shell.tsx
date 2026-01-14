@@ -17,11 +17,17 @@ const NAV = [
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = React.useState<boolean>(true);
+  const [isDemo, setIsDemo] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     const stored = window.localStorage.getItem("aio-theme");
     if (stored === "light") setIsDark(false);
     if (stored === "dark") setIsDark(true);
+  }, []);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setIsDemo(params.get("demo") === "true");
   }, []);
 
   function toggleTheme() {
@@ -30,6 +36,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       window.localStorage.setItem("aio-theme", next ? "dark" : "light");
       return next;
     });
+  }
+
+  function withDemo(href: string) {
+    if (!isDemo) return href;
+    const [path, query = ""] = href.split("?");
+    const params = new URLSearchParams(query);
+    params.set("demo", "true");
+    const next = params.toString();
+    return next ? `${path}?${next}` : path;
   }
 
   return (
@@ -48,12 +63,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
               AI Visibility Intelligence
             </div>
+            {isDemo ? (
+              <div className="mt-3 inline-flex w-fit items-center rounded-full border border-slate-800 bg-slate-900 px-2 py-0.5 text-xs text-slate-200">
+                Demo Mode · Sample Data
+              </div>
+            ) : null}
 
             <nav className="mt-6 space-y-1">
               {NAV.map((item) => (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={withDemo(item.href)}
                   className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
                 >
                   {item.label}

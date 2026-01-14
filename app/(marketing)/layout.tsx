@@ -71,7 +71,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <Link href="/how-it-works" className="hover:text-slate-200">
                 How it works
               </Link>
-              <Link href="/dashboard" className="hover:text-slate-200">
+              <Link href="/dashboard?demo=true" className="hover:text-slate-200">
                 Demo
               </Link>
             </div>

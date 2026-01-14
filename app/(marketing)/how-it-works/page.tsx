@@ -303,7 +303,7 @@ export default function HowItWorksPage() {
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
-                href="/dashboard"
+                href="/dashboard?demo=true"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-5 text-sm font-medium text-white hover:bg-slate-900"
               >
                 Try Live Demo →

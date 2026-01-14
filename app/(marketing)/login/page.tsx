@@ -68,7 +68,7 @@ export default function LoginPage() {
 
               <div className="pt-2 text-center text-sm text-slate-500">
                 Or{" "}
-                <Link href="/dashboard" className="text-slate-300 hover:text-white">
+                <Link href="/dashboard?demo=true" className="text-slate-300 hover:text-white">
                   try the demo
                 </Link>{" "}
                 without signing in

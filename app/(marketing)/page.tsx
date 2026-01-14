@@ -164,7 +164,7 @@ export default function MarketingHomePage() {
             Get 10 Free Credits →
           </Link>
           <Link
-            href="/dashboard"
+            href="/dashboard?demo=true"
             className="inline-flex items-center justify-center rounded-md border border-slate-800 bg-slate-950/40 px-5 py-2.5 text-sm text-slate-200 hover:bg-slate-900"
           >
             View Live Demo
