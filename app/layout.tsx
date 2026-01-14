@@ -1,24 +1,36 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+import type { Metadata } from "next";
+import Link from "next/link";
 
-const inter = Inter({ subsets: ['latin'] })
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'AIO Mapper - AI Brand Visibility Intelligence',
-  description: 'Measure and explain how your brand appears in AI-generated answers',
-}
+  title: {
+    default: "AIO Mapper",
+    template: "%s · AIO Mapper"
+  },
+  description: "SaaS dashboard starter using Next.js App Router."
+};
 
 export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+  children
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        {children}
+    <html lang="en">
+      <body>
+        <div className="container">
+          <header className="nav">
+            <Link href="/">AIO Mapper</Link>
+            <nav style={{ display: "flex", gap: 8 }}>
+              <Link href="/">Home</Link>
+              <Link href="/dashboard">Dashboard</Link>
+            </nav>
+          </header>
+          <main style={{ paddingTop: 24 }}>{children}</main>
+        </div>
       </body>
     </html>
-  )
+  );
 }
+
