@@ -1,6 +1,9 @@
 .next/
 node_modules/
-.env*
+.env
+.env.local
+.env.*.local
+!.env.example
 
 # logs
 npm-debug.log*
@@ -10,4 +13,3 @@ pnpm-debug.log*
 
 # OS
 .DS_Store
-
