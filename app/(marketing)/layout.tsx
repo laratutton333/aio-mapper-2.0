@@ -34,7 +34,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                 {item.label}
               </Link>
             ))}
-            <Link href="/dashboard" className="hidden hover:text-white sm:inline-flex">
+            <Link href="/login" className="hidden hover:text-white sm:inline-flex">
               Log in
             </Link>
             <Link
