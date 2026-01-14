@@ -1,0 +1,360 @@
+"use client";
+
+import * as React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/components/ui/cn";
+import type {
+  DemoEffort,
+  DemoImpact,
+  DemoRecommendation,
+  DemoRecommendationCategory,
+  DemoRecommendationStatus,
+  DemoRecommendationsData
+} from "@/lib/demo/demo-recommendations";
+
+type CategoryFilter = "All" | DemoRecommendationCategory;
+type StatusFilter = "All" | DemoRecommendationStatus;
+
+function metricLabel(status: DemoRecommendationStatus) {
+  if (status === "Pending") return "PENDING";
+  if (status === "In Progress") return "IN PROGRESS";
+  return "COMPLETED";
+}
+
+function impactPill(impact: DemoImpact) {
+  if (impact === "High") return "bg-emerald-500/10 text-emerald-300 border-emerald-500/20";
+  if (impact === "Medium") return "bg-amber-500/10 text-amber-300 border-amber-500/20";
+  return "bg-slate-800/60 text-slate-200 border-slate-700";
+}
+
+function effortPill(effort: DemoEffort) {
+  if (effort === "Low") return "bg-teal-500/10 text-teal-300 border-teal-500/20";
+  if (effort === "Medium") return "bg-amber-500/10 text-amber-300 border-amber-500/20";
+  return "bg-rose-500/10 text-rose-300 border-rose-500/20";
+}
+
+function statusPill(status: DemoRecommendationStatus) {
+  if (status === "Pending") return "text-slate-400";
+  if (status === "In Progress") return "text-blue-300";
+  return "text-emerald-300";
+}
+
+function FilterChip({
+  active,
+  onClick,
+  children
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
+        active
+          ? "border-slate-700 bg-slate-950 text-slate-100"
+          : "border-slate-800 bg-slate-950/40 text-slate-400 hover:bg-slate-900/40 hover:text-slate-200"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function TopButton({
+  active,
+  onClick,
+  children
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
+        active
+          ? "border-blue-600/50 bg-blue-600 text-white"
+          : "border-slate-800 bg-slate-950/40 text-slate-200 hover:bg-slate-900"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function RecommendationIcon({ category }: { category: DemoRecommendationCategory }) {
+  if (category === "Structure") return <span className="text-slate-300">S</span>;
+  if (category === "Authority") return <span className="text-slate-300">A</span>;
+  return <span className="text-slate-300">C</span>;
+}
+
+function EvidenceDrawer({
+  item,
+  onClose
+}: {
+  item: DemoRecommendation;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50">
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/60"
+        onClick={onClose}
+        aria-label="Close evidence"
+      />
+      <div className="absolute right-0 top-0 h-full w-full max-w-xl overflow-y-auto overflow-x-hidden border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-md bg-blue-600/15 px-2 py-0.5 text-xs font-semibold text-blue-300">
+                Sample Data
+              </span>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold",
+                  impactPill(item.impact)
+                )}
+              >
+                {item.impact.toLowerCase()} impact
+              </span>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold",
+                  effortPill(item.effort)
+                )}
+              >
+                {item.effort.toLowerCase()} effort
+              </span>
+            </div>
+            <div className="mt-3 text-xl font-semibold text-white">{item.title}</div>
+            <div className="mt-1 text-sm text-slate-400">
+              Evidence is illustrative only and not exportable in demo mode.
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-slate-800 bg-slate-950/40 px-3 py-2 text-sm text-slate-200 hover:bg-slate-900"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="mt-6 space-y-6">
+          <div>
+            <div className="text-xs font-semibold tracking-wide text-slate-400">WHY THIS MATTERS</div>
+            <div className="mt-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-100">
+              {item.why}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold tracking-wide text-slate-400">BASED ON</div>
+            <div className="mt-3 space-y-2 text-sm text-slate-300">
+              {item.evidence.basedOn.map((row) => (
+                <div key={row} className="flex items-start gap-3">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                  <span>{row}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold tracking-wide text-slate-400">OBSERVED PATTERNS</div>
+            <div className="mt-3 space-y-2 text-sm text-slate-300">
+              {item.evidence.observedPatterns.map((row) => (
+                <div key={row} className="flex items-start gap-3">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                  <span>{row}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 text-xs text-slate-500">
+            Demo views display fictional brands and simulated data for illustrative purposes only.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function RecommendationsBoard({ data }: { data: DemoRecommendationsData }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const category = (searchParams.get("cat") as CategoryFilter | null) ?? "All";
+  const status = (searchParams.get("status") as StatusFilter | null) ?? "All";
+  const openEvidence = searchParams.get("evidence");
+
+  const selected = React.useMemo(() => {
+    if (!openEvidence) return null;
+    return data.items.find((i) => i.id === openEvidence) ?? null;
+  }, [data.items, openEvidence]);
+
+  function setParam(key: string, value: string | null) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === null) params.delete(key);
+    else params.set(key, value);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  const filtered = React.useMemo(() => {
+    return data.items.filter((item) => {
+      if (category !== "All" && item.category !== category) return false;
+      if (status !== "All" && item.status !== status) return false;
+      return true;
+    });
+  }, [category, data.items, status]);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight">Recommendations</h1>
+          <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
+        </div>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          Actionable insights to improve {data.brandName}&apos;s AI visibility
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-slate-200 dark:border-slate-900">
+          <CardHeader>
+            <CardTitle className="text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-400">
+              TOTAL RECOMMENDATIONS
+            </CardTitle>
+          </CardHeader>
+          <div className="mt-1 text-3xl font-semibold text-slate-100">{data.total}</div>
+        </Card>
+        {(Object.keys(data.counts) as DemoRecommendationStatus[]).map((key) => (
+          <Card key={key} className="border-slate-200 dark:border-slate-900">
+            <CardHeader>
+              <CardTitle className="text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-400">
+                {metricLabel(key)}
+              </CardTitle>
+            </CardHeader>
+            <div className="mt-1 text-3xl font-semibold text-slate-100">{data.counts[key]}</div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+        <div className="flex flex-wrap gap-2">
+          {(["All", "Content", "Authority", "Structure"] as CategoryFilter[]).map((value) => (
+            <FilterChip
+              key={value}
+              active={category === value}
+              onClick={() => setParam("cat", value === "All" ? null : value)}
+            >
+              {value}
+            </FilterChip>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {(["All", "Pending", "In Progress", "Completed"] as StatusFilter[]).map((value) => (
+            <TopButton
+              key={value}
+              active={status === value}
+              onClick={() => setParam("status", value === "All" ? null : value)}
+            >
+              {value}
+            </TopButton>
+          ))}
+        </div>
+      </div>
+
+      <div className="text-xs text-slate-500">{filtered.length} recommendations</div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {filtered.map((item) => (
+          <Card key={item.id} className="overflow-hidden border-slate-200 dark:border-slate-900">
+            <CardHeader className="flex-col items-start">
+              <div className="flex w-full items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900">
+                    <RecommendationIcon category={item.category} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-slate-100">{item.title}</div>
+                    <div className="mt-1 text-xs text-slate-500">{item.category}</div>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold",
+                      impactPill(item.impact)
+                    )}
+                  >
+                    {item.impact.toLowerCase()} impact
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold",
+                      effortPill(item.effort)
+                    )}
+                  >
+                    {item.effort.toLowerCase()} effort
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+
+            <div className="px-4 pb-4">
+              <p className="text-sm text-slate-300">{item.summary}</p>
+              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900/30 p-3 text-xs text-slate-300">
+                <span className="font-semibold text-slate-200">Why:</span> {item.why}
+              </div>
+
+              <div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className={cn("text-sm", statusPill(item.status))}>{item.status}</div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setParam("evidence", item.id)}
+                    className="text-sm text-slate-300 hover:text-white"
+                  >
+                    View Evidence
+                  </button>
+                  <button
+                    type="button"
+                    disabled={item.status !== "Pending"}
+                    className={cn(
+                      "inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium",
+                      item.status === "Pending"
+                        ? "bg-blue-600 text-white hover:bg-blue-500"
+                        : "cursor-not-allowed bg-blue-600/30 text-white/70"
+                    )}
+                    title="Demo mode is read-only."
+                  >
+                    Start
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {selected ? <EvidenceDrawer item={selected} onClose={() => setParam("evidence", null)} /> : null}
+    </div>
+  );
+}
