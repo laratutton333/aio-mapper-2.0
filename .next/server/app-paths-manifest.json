@@ -1,0 +1,17 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/route": "app/api/auth/route.js",
+  "/api/citations/route": "app/api/citations/route.js",
+  "/api/dashboard/route": "app/api/dashboard/route.js",
+  "/api/recommendations/route": "app/api/recommendations/route.js",
+  "/api/comparison/route": "app/api/comparison/route.js",
+  "/api/prompts/route": "app/api/prompts/route.js",
+  "/api/stripe/webhook/route": "app/api/stripe/webhook/route.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/citations/page": "app/citations/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/comparison/page": "app/comparison/page.js",
+  "/recommendations/page": "app/recommendations/page.js",
+  "/prompts/page": "app/prompts/page.js"
+}

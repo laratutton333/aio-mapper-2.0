@@ -1,0 +1,185 @@
+Principle 1: One runtime model
+
+No “frontend build” vs “backend server”
+
+No hidden execution paths
+
+Everything runs as request-scoped server functions
+
+Principle 2: Backend logic lives with routes
+
+APIs are not a separate “layer”
+
+Route handlers are first-class
+
+TypeScript errors surface immediately
+
+Principle 3: Platform alignment > flexibility
+
+You gain speed by aligning with Vercel’s defaults
+
+You lose weeks when you fight them
+
+2️⃣ The target stack (explicit)
+Frontend + Backend
+
+Next.js 14+ (App Router)
+
+React Server Components
+
+Route Handlers (app/api/**/route.ts)
+
+Streaming + caching where it helps
+
+Auth + Data
+
+Supabase
+
+Auth (JWT, RLS)
+
+Postgres
+
+Edge functions if needed later
+
+Payments
+
+Stripe
+
+Webhooks via route handlers
+
+No Express webhook server
+
+Deployment
+
+Vercel
+
+Zero vercel.json complexity
+
+No server adapters
+
+Preview environments “just work”
+
+3️⃣ Concrete folder structure (this matters)
+
+This is the model that avoids ambiguity.
+
+/app
+  /layout.tsx
+  /page.tsx
+
+  /app
+    /page.tsx            // /app UI
+    /dashboard
+      /page.tsx
+    /audits
+      /[auditId]
+        /page.tsx
+
+  /api
+    /dashboard
+      /route.ts          // GET dashboard data
+    /audits
+      /route.ts          // POST create audit
+    /auth
+      /route.ts
+    /stripe
+      /webhook
+        /route.ts
+
+/lib
+  /db.ts                 // Supabase client (server)
+  /queries.ts            // Typed DB queries
+  /analytics.ts          // Scoring logic
+  /demo-data.ts
+
+/components
+  /charts
+  /tables
+  /ui
+
+/types
+  /domain.ts
+
+
+
+Key rule:
+
+If it’s backend logic, it lives in /app/api or /lib.
+
+4️⃣ How requests flow (no ambiguity)
+Dashboard load
+Browser
+  → /app/dashboard (Server Component)
+    → fetch("/api/dashboard")
+      → app/api/dashboard/route.ts
+        → Supabase query
+        → JSON
+
+
+No Express.
+No adapters.
+No custom wiring.
+
+5️⃣ Data access model (this fixes your storage.ts pain)
+Replace storage.ts with query functions
+
+Instead of:
+
+In-memory mock storage
+
+Manual null/undefined normalization
+
+State living outside request scope
+
+You do:
+
+// lib/queries.ts
+export async function getDashboardData(userId: string) {
+  const { data } = await supabase
+    .from("audits")
+    .select(...)
+  return data
+}
+
+
+Benefits:
+
+DB schema is source of truth
+
+Types come from Supabase
+
+No fake storage layer
+
+No mismatch between “demo” and “real”
+
+Demo mode becomes:
+
+if (demo) return demoDashboardData
+
+
+Not a separate system.
+
+6️⃣ Stripe model (simpler than Express)
+Webhook
+// app/api/stripe/webhook/route.ts
+export async function POST(req: Request) {
+  const sig = req.headers.get("stripe-signature")
+  const body = await req.text()
+  // verify + handle
+}
+
+
+No raw body hacks.
+No middleware ordering.
+No server lifetime concerns.
+
+7️⃣ Why this model is better for your product
+Compared to your current architecture
+Area	Old	New
+Deployment	Implicit, fragile	Native, explicit
+Backend execution	Hidden	Guaranteed
+Type safety	Partial	Enforced
+Debugging	Guesswork	Deterministic
+Demo mode	Separate logic	Flag-based
+Scaling	Hard	Automatic
+Team onboarding	Steep	Familiar

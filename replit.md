@@ -4,7 +4,7 @@
 
 AIO Mapper is a B2B SaaS analytics platform that measures and explains how brands appear in AI-generated answers. The platform tracks brand visibility, citations, and recommendations across AI search engines, providing transparent and explainable metrics for enterprise users.
 
-The application follows a monorepo structure with a React frontend, Express backend, and PostgreSQL database using Drizzle ORM. It's designed as an information-dense analytics dashboard with progressive disclosure patterns.
+The application has been migrated to Next.js 15 App Router architecture for Vercel deployment. It includes Server Components, Route Handlers, and is designed as an information-dense analytics dashboard with progressive disclosure patterns. The original Vite + Express setup remains for local development on Replit.
 
 ## User Preferences
 
@@ -12,14 +12,25 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
+### Next.js Architecture (Vercel Deployment)
+- **Framework**: Next.js 15 App Router with React 18
+- **Rendering**: Server Components for pages, Route Handlers for API
+- **UI Components**: Custom components with Tailwind CSS
+- **Styling**: Tailwind CSS with CSS custom properties for theming
+- **Build Config**: `next.config.mjs` with ESM exports, `vercel.json` for deployment
+
+Key directories:
+- `app/` - Next.js App Router pages and layouts
+- `app/api/` - Route Handlers for API endpoints
+- `components/` - Shared React components (including AppLayout)
+- `lib/` - Utility functions and demo data
+- `types/` - TypeScript type definitions
+
+### Legacy Architecture (Replit Local Development)
+- **Framework**: React 18 with TypeScript + Vite
+- **Backend**: Express.js with TypeScript
 - **Routing**: Wouter (lightweight React router)
 - **State Management**: TanStack React Query for server state
-- **UI Components**: shadcn/ui component library built on Radix UI primitives
-- **Styling**: Tailwind CSS with custom design tokens and CSS variables for theming
-- **Charts**: Recharts for data visualization (bar charts, pie charts, trend lines)
-- **Build Tool**: Vite with HMR support
 
 The frontend is organized around page-level components (Dashboard, Prompts, Comparison, Citations, Recommendations, Settings) with shared UI components and custom hooks. The design system follows Linear/Stripe aesthetics with a focus on data transparency and information density.
 
@@ -84,9 +95,11 @@ Core entities defined in `shared/schema.ts`:
 - **Vaul**: Drawer component for mobile-friendly sliding panels
 
 ### Build & Development
-- **Vite**: Development server with React plugin and Replit-specific plugins
-- **esbuild**: Production server bundling
+- **Next.js**: Production build for Vercel deployment (`npx next build`)
+- **Vite**: Local development server on Replit with React plugin
+- **esbuild**: Production server bundling for Express
 - **TypeScript**: Strict mode enabled with bundler module resolution
+- **Vercel**: Deployment configured in `vercel.json` with `framework: nextjs`
 
 ### Fonts
 - Inter (primary UI font via Google Fonts)
