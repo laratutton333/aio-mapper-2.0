@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const NAV = [
@@ -7,9 +8,13 @@ const NAV = [
 
 function LogoMark() {
   return (
-    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-semibold text-white shadow-sm shadow-blue-500/20">
-      AI
-    </div>
+    <Image
+      src="/brand/logos/logo-64.png"
+      alt="AIO Mapper"
+      width={28}
+      height={28}
+      className="h-7 w-7 rounded-md"
+    />
   );
 }
 
