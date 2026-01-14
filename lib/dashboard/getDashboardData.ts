@@ -9,10 +9,12 @@ function calculateSummary(prompts: PromptResult[]) {
   const total = prompts.length || 1;
   const detectedCount = prompts.filter((p) => p.result.brandDetected).length;
   const citedCount = prompts.filter((p) => p.result.citationPresent).length;
+  const recommendedCount = prompts.filter((p) => p.result.mentionType === "primary").length;
 
   return {
     presenceRate: detectedCount / total,
-    citationRate: citedCount / total
+    citationRate: citedCount / total,
+    recommendationRate: recommendedCount / total
   };
 }
 
@@ -77,7 +79,7 @@ export async function getDashboardData(): Promise<DashboardResponse> {
 
   const fallbackResult: BrandPresenceResult = {
     brandDetected: false,
-    mentionType: null,
+    mentionType: "none",
     citationPresent: false,
     confidence: null
   };
@@ -92,7 +94,11 @@ export async function getDashboardData(): Promise<DashboardResponse> {
 
     return toPromptResult(template, {
       brandDetected: Boolean(presence.brand_detected),
-      mentionType: (presence.mention_type as string | null) ?? null,
+      mentionType: ((presence.mention_type as string | null) ?? "none") as
+        | "primary"
+        | "secondary"
+        | "implied"
+        | "none",
       citationPresent: Boolean(presence.citation_present),
       confidence: (presence.confidence as number | null) ?? null
     });

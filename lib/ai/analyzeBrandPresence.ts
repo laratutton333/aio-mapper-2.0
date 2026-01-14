@@ -1,64 +1,115 @@
-import type { AiPromptTemplateRow, BrandPresenceResult } from "@/types/ai";
+import type { BrandPresenceResult } from "@/types/ai";
 
-import { runOpenAiJsonSchema } from "@/lib/ai/openai";
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-const brandPresenceSchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    brand_detected: { type: "boolean" },
-    mention_type: {
-      anyOf: [
-        { type: "string", enum: ["explicit", "implicit", "none"] },
-        { type: "null" }
-      ]
-    },
-    citation_present: { type: "boolean" },
-    confidence: {
-      anyOf: [{ type: "number", minimum: 0, maximum: 1 }, { type: "null" }]
+function normalize(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function generateVariants(brandName: string): string[] {
+  const base = normalize(brandName);
+  const stripped = base.replace(/[^a-z0-9]+/g, " ").trim();
+  const noSpaces = stripped.replace(/\s+/g, "");
+  const withoutSuffix = stripped
+    .replace(/\b(inc|inc\.|ltd|ltd\.|llc|corp|corp\.|co|co\.|company)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const variants = [base, stripped, noSpaces, withoutSuffix].filter(Boolean);
+  return Array.from(new Set(variants));
+}
+
+function findEarliestMatch(text: string, variants: string[]) {
+  let earliestIndex: number | null = null;
+  let matchedVariant: string | null = null;
+
+  for (const variant of variants) {
+    const pattern = new RegExp(`\\b${escapeRegExp(variant)}\\b`, "i");
+    const match = pattern.exec(text);
+    if (!match || match.index === undefined) continue;
+
+    const index = match.index;
+    if (earliestIndex === null || index < earliestIndex) {
+      earliestIndex = index;
+      matchedVariant = variant;
     }
-  },
-  required: ["brand_detected", "mention_type", "citation_present", "confidence"]
-} as const;
+  }
 
-export type AnalyzeBrandPresenceOutput = {
-  result: BrandPresenceResult;
-  rawResponse: string;
-};
+  return { earliestIndex, matchedVariant };
+}
 
-export async function analyzeBrandPresence(args: {
-  template: AiPromptTemplateRow;
-  brand: string;
-  model: string;
-}): Promise<AnalyzeBrandPresenceOutput> {
-  const input = [
-    "You are a strict evaluator. Follow the prompt template intent and only return JSON that matches the schema.",
-    `Brand name: ${args.brand}`,
-    "",
-    args.template.prompt_template
-  ].join("\n");
+export function extractUrls(text: string): string[] {
+  const matches = text.match(/\bhttps?:\/\/[^\s)>\]]+/gi) ?? [];
+  return Array.from(new Set(matches.map((u) => u.replace(/[.,;:]+$/, ""))));
+}
 
-  const { raw, outputText } = await runOpenAiJsonSchema({
-    model: args.model,
-    input,
-    jsonSchema: brandPresenceSchema
-  });
+function isPrimaryMention(text: string, brandName: string) {
+  const escaped = escapeRegExp(brandName.trim());
+  const inFirstChars = new RegExp(`\\b${escaped}\\b`, "i").test(text.slice(0, 250));
+  const firstListItem = new RegExp(
+    `(^|\\n)\\s*(1\\.|-|\\*)\\s+[^\\n]*\\b${escaped}\\b`,
+    "i"
+  ).test(text);
 
-  const parsed = JSON.parse(outputText) as {
-    brand_detected: boolean;
-    mention_type: "explicit" | "implicit" | "none" | null;
-    citation_present: boolean;
-    confidence: number | null;
-  };
+  return inFirstChars || firstListItem;
+}
+
+function hasCitationNearIndex(text: string, index: number, urls: string[]) {
+  if (urls.length === 0) return false;
+  const windowText = text.slice(Math.max(0, index - 100), index + 250);
+  return /\bhttps?:\/\/[^\s)>\]]+/i.test(windowText);
+}
+
+export function analyzeBrandPresence(args: {
+  responseText: string;
+  brandName: string;
+  citations?: string[];
+}): { result: BrandPresenceResult; extractedUrls: string[] } {
+  const responseText = args.responseText ?? "";
+  const brandName = args.brandName ?? "";
+
+  const variants = generateVariants(brandName);
+  const { earliestIndex, matchedVariant } = findEarliestMatch(responseText, variants);
+  const extractedUrls = extractUrls(responseText);
+  const citations = (args.citations ?? []).filter(Boolean);
+
+  const brandDetected = earliestIndex !== null;
+  const exactMatched = normalize(brandName) === normalize(matchedVariant ?? "");
+
+  let mentionType: BrandPresenceResult["mentionType"] = "none";
+  if (!brandDetected) {
+    mentionType = "none";
+  } else if (!exactMatched) {
+    mentionType = "implied";
+  } else if (isPrimaryMention(responseText, brandName)) {
+    mentionType = "primary";
+  } else {
+    mentionType = "secondary";
+  }
+
+  const citationPresent =
+    brandDetected &&
+    (citations.length > 0 ||
+      (earliestIndex !== null && hasCitationNearIndex(responseText, earliestIndex, extractedUrls)));
+
+  const confidence: number | null =
+    mentionType === "none"
+      ? null
+      : mentionType === "primary"
+        ? 0.9
+        : mentionType === "secondary"
+          ? 0.75
+          : 0.6;
 
   return {
-    rawResponse: raw,
+    extractedUrls,
     result: {
-      brandDetected: parsed.brand_detected,
-      mentionType:
-        parsed.mention_type === "none" ? null : (parsed.mention_type as string | null),
-      citationPresent: parsed.citation_present,
-      confidence: parsed.confidence
+      brandDetected,
+      mentionType,
+      citationPresent,
+      confidence
     }
   };
 }

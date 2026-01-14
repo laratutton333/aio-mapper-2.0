@@ -29,13 +29,14 @@ export type AiBrandPresenceRow = {
 
 export type BrandPresenceResult = {
   brandDetected: boolean;
-  mentionType: string | null;
+  mentionType: "primary" | "secondary" | "implied" | "none";
   citationPresent: boolean;
   confidence: number | null;
 };
 
 export type RunVisibilityRequest = {
-  brand: string;
-  auditId: string | null;
+  audit_id: string | null;
+  brand_name: string;
+  category: string | null;
   model: string | null;
 };

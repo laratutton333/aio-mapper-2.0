@@ -31,3 +31,11 @@ create table if not exists public.ai_brand_presence (
   created_at timestamp with time zone null default now()
 );
 
+-- Optional (Phase 1.5): citations detected in model output
+create table if not exists public.ai_citations (
+  id uuid primary key default gen_random_uuid(),
+  prompt_run_id uuid null references public.ai_prompt_runs (id) on delete set null,
+  source_url text not null,
+  source_type text null,
+  created_at timestamp with time zone null default now()
+);

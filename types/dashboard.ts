@@ -16,6 +16,7 @@ export type DashboardResponse = {
   summary: {
     presenceRate: number;
     citationRate: number;
+    recommendationRate: number;
   };
   prompts: PromptResult[];
   recommendations: Recommendation[];

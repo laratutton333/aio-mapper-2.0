@@ -35,6 +35,13 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+        <div className="text-xs text-slate-600">Recommendation Rate</div>
+        <div className="mt-1 text-2xl font-semibold">
+          {(data.summary.recommendationRate * 100).toFixed(0)}%
+        </div>
+      </div>
+
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
         <div className="text-sm font-semibold">Run Visibility Check</div>
         <div className="mt-1 text-sm text-slate-600">
@@ -72,11 +79,9 @@ export default async function DashboardPage() {
                     </span>
                   </div>
                   <div>
-                    Confidence:{" "}
+                    Mention:{" "}
                     <span className="font-medium">
-                      {prompt.result.confidence === null
-                        ? "n/a"
-                        : prompt.result.confidence.toFixed(2)}
+                      {prompt.result.mentionType}
                     </span>
                   </div>
                 </div>

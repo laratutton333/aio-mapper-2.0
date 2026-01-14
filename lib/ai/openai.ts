@@ -4,12 +4,14 @@ export type OpenAiResponsesApiArgs = {
   model: string;
   input: string;
   jsonSchema: Record<string, unknown>;
+  schemaName: string;
 };
 
 export async function runOpenAiJsonSchema({
   model,
   input,
-  jsonSchema
+  jsonSchema,
+  schemaName
 }: OpenAiResponsesApiArgs): Promise<{ raw: string; outputText: string }> {
   const env = getServerEnv();
   const res = await fetch("https://api.openai.com/v1/responses", {
@@ -24,7 +26,7 @@ export async function runOpenAiJsonSchema({
       response_format: {
         type: "json_schema",
         json_schema: {
-          name: "brand_presence_result",
+          name: schemaName,
           schema: jsonSchema,
           strict: true
         }
@@ -51,3 +53,6 @@ export async function runOpenAiJsonSchema({
   return { raw, outputText };
 }
 
+export function parseStrictJson<T>(value: string): T {
+  return JSON.parse(value) as T;
+}
