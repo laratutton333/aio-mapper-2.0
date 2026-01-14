@@ -313,11 +313,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const apiKey =
         process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-      if (!apiKey && !openai.configuration.apiKey) {
+      if (!apiKey) {
         return res.status(500).json({ error: "OpenAI API key not configured" });
       }
 
       try {
+        interface AnalyzePromptRequest {
+          promptText?: string;
+          targetBrand?: string;
+          brandVariants?: string[];
+          competitorBrands?: string[];
+          brandDomain?: string;
+          competitorDomains?: string[];
+          model?: string;
+        }
+
+        const body =
+          typeof req.body === "string" ? JSON.parse(req.body) : (req.body ?? {});
         const {
           promptText,
           targetBrand = "Acme Corp",
@@ -326,7 +338,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           brandDomain = "acmecorp.com",
           competitorDomains = ["techco.com", "innovatelabs.io", "nextgen.com"],
           model = "gpt-4o-mini",
-        } = req.body;
+        } = body as AnalyzePromptRequest;
 
         if (!promptText) {
           return res.status(400).json({ error: "promptText is required" });
