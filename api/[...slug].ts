@@ -222,7 +222,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  const slug = req.query.slug as string[] | undefined;
+  const slugParam = req.query.slug;
+  const slug = Array.isArray(slugParam)
+    ? slugParam
+    : typeof slugParam === "string"
+    ? slugParam.split("/").filter(Boolean)
+    : undefined;
   const [route, id] = slug || [];
 
   switch (route) {
