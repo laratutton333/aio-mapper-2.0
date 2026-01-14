@@ -1,5 +1,6 @@
 import { analyzeBrandPresence } from "@/lib/ai/analyzeBrandPresence";
 import { parseStrictJson, runOpenAiJsonSchema } from "@/lib/ai/openai";
+import { requireUser } from "@/lib/auth/requireUser";
 import { getActivePromptTemplates } from "@/lib/prompts/getPromptTemplates";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { RunVisibilityRequest } from "@/types/ai";
@@ -21,6 +22,7 @@ function interpolateTemplate(template: string, values: Record<string, string | n
 }
 
 export async function POST(req: Request) {
+  const user = await requireUser();
   const body = (await req.json()) as RunVisibilityRequest;
 
   if (!body.brand_name || body.brand_name.trim().length === 0) {
@@ -43,6 +45,39 @@ export async function POST(req: Request) {
   const auditId = body.audit_id ?? crypto.randomUUID();
   const brandName = body.brand_name.trim();
   const category = body.category?.trim() || null;
+
+  const { data: existingAudit, error: existingAuditError } = await supabase
+    .from("ai_audits")
+    .select("id,user_id")
+    .eq("id", auditId)
+    .maybeSingle();
+
+  if (existingAuditError) {
+    if (!existingAuditError.message.includes("ai_audits") && !existingAuditError.message.includes("relation")) {
+      return Response.json({ success: false, error: existingAuditError.message }, { status: 500 });
+    }
+  }
+
+  if (existingAudit && (existingAudit.user_id as string) !== user.id) {
+    return Response.json({ success: false, error: "Forbidden" }, { status: 403 });
+  }
+
+  const { error: upsertAuditError } = await supabase.from("ai_audits").upsert(
+    {
+      id: auditId,
+      user_id: user.id,
+      brand_name: brandName,
+      primary_domain: null,
+      status: "running"
+    },
+    { onConflict: "id" }
+  );
+
+  if (upsertAuditError) {
+    if (!upsertAuditError.message.includes("ai_audits") && !upsertAuditError.message.includes("relation")) {
+      return Response.json({ success: false, error: upsertAuditError.message }, { status: 500 });
+    }
+  }
 
   if (body.audit_id) {
     const { data: existingRuns, error: existingRunsError } = await supabase
@@ -90,88 +125,95 @@ export async function POST(req: Request) {
     }
   }
 
-  for (const template of templates) {
-    const renderedPrompt = interpolateTemplate(template.prompt_template, {
-      brand: brandName,
-      category
-    });
+  try {
+    for (const template of templates) {
+      const renderedPrompt = interpolateTemplate(template.prompt_template, {
+        brand: brandName,
+        category
+      });
 
-    const input = [
-      "Answer the question clearly and concisely. If you include sources, include their URLs.",
-      renderedPrompt
-    ].join("\n\n");
+      const input = [
+        "Answer the question clearly and concisely. If you include sources, include their URLs.",
+        renderedPrompt
+      ].join("\n\n");
 
-    const { raw: openaiRaw, outputText } = await runOpenAiJsonSchema({
-      model,
-      input,
-      jsonSchema: answerSchema,
-      schemaName: "ai_visibility_answer_v1"
-    });
+      const { raw: openaiRaw, outputText } = await runOpenAiJsonSchema({
+        model,
+        input,
+        jsonSchema: answerSchema,
+        schemaName: "ai_visibility_answer_v1"
+      });
 
-    const parsed = parseStrictJson<{ answer_text: string; citations: string[] }>(outputText);
-    const analyzed = analyzeBrandPresence({
-      responseText: parsed.answer_text,
-      brandName,
-      citations: parsed.citations
-    });
+      const parsed = parseStrictJson<{ answer_text: string; citations: string[] }>(outputText);
+      const analyzed = analyzeBrandPresence({
+        responseText: parsed.answer_text,
+        brandName,
+        citations: parsed.citations
+      });
 
-    const promptRunId = crypto.randomUUID();
-    const executedAt = new Date().toISOString();
+      const promptRunId = crypto.randomUUID();
+      const executedAt = new Date().toISOString();
 
-    const { error: runError } = await supabase.from("ai_prompt_runs").insert({
-      id: promptRunId,
-      audit_id: auditId,
-      prompt_id: template.id,
-      brand_name: brandName,
-      model,
-      raw_response: JSON.stringify({
-        prompt: renderedPrompt,
-        category,
-        answer_text: parsed.answer_text,
-        citations: parsed.citations,
-        openai_raw: openaiRaw
-      }),
-      executed_at: executedAt
-    });
+      const { error: runError } = await supabase.from("ai_prompt_runs").insert({
+        id: promptRunId,
+        audit_id: auditId,
+        prompt_id: template.id,
+        brand_name: brandName,
+        model,
+        raw_response: JSON.stringify({
+          prompt: renderedPrompt,
+          category,
+          answer_text: parsed.answer_text,
+          citations: parsed.citations,
+          openai_raw: openaiRaw
+        }),
+        executed_at: executedAt
+      });
 
-    if (runError) {
-      return Response.json({ success: false, error: runError.message }, { status: 500 });
-    }
+      if (runError) {
+        return Response.json({ success: false, error: runError.message }, { status: 500 });
+      }
 
-    const { error: presenceError } = await supabase.from("ai_brand_presence").insert({
-      id: crypto.randomUUID(),
-      prompt_run_id: promptRunId,
-      brand_detected: analyzed.result.brandDetected,
-      mention_type: analyzed.result.mentionType,
-      citation_present: analyzed.result.citationPresent,
-      confidence: analyzed.result.confidence
-    });
+      const { error: presenceError } = await supabase.from("ai_brand_presence").insert({
+        id: crypto.randomUUID(),
+        prompt_run_id: promptRunId,
+        brand_detected: analyzed.result.brandDetected,
+        mention_type: analyzed.result.mentionType,
+        citation_present: analyzed.result.citationPresent,
+        confidence: analyzed.result.confidence
+      });
 
-    if (presenceError) {
-      return Response.json(
-        { success: false, error: presenceError.message },
-        { status: 500 }
+      if (presenceError) {
+        return Response.json(
+          { success: false, error: presenceError.message },
+          { status: 500 }
+        );
+      }
+
+      const urls = Array.from(
+        new Set([...(parsed.citations ?? []), ...(analyzed.extractedUrls ?? [])].filter(Boolean))
       );
-    }
+      if (urls.length > 0) {
+        const { error: citationError } = await supabase.from("ai_citations").insert(
+          urls.map((url) => ({
+            id: crypto.randomUUID(),
+            prompt_run_id: promptRunId,
+            source_url: url,
+            source_type: null
+          }))
+        );
 
-    const urls = Array.from(
-      new Set([...(parsed.citations ?? []), ...(analyzed.extractedUrls ?? [])].filter(Boolean))
-    );
-    if (urls.length > 0) {
-      const { error: citationError } = await supabase.from("ai_citations").insert(
-        urls.map((url) => ({
-          id: crypto.randomUUID(),
-          prompt_run_id: promptRunId,
-          source_url: url,
-          source_type: null
-        }))
-      );
-
-      if (citationError) {
-        return Response.json({ success: false, error: citationError.message }, { status: 500 });
+        if (citationError) {
+          return Response.json({ success: false, error: citationError.message }, { status: 500 });
+        }
       }
     }
-  }
 
-  return Response.json({ success: true, audit_id: auditId });
+    await supabase.from("ai_audits").update({ status: "completed" }).eq("id", auditId);
+    return Response.json({ success: true, audit_id: auditId });
+  } catch (error) {
+    await supabase.from("ai_audits").update({ status: "failed" }).eq("id", auditId);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return Response.json({ success: false, error: message }, { status: 500 });
+  }
 }

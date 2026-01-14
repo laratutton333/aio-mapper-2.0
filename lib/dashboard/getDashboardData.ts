@@ -95,22 +95,13 @@ async function safeLoadCitationsByRunId(args: {
   return { citationCountByRunId, uniqueDomains, totalCitations };
 }
 
-export async function getDashboardData(args?: { auditId?: string | null }): Promise<DashboardResponse> {
+export async function getDashboardData(args?: {
+  auditId?: string | null;
+  userId?: string | null;
+}): Promise<DashboardResponse> {
   const supabase = createSupabaseAdminClient();
   const templates = await getActivePromptTemplates();
   const templateIds = templates.map((t) => t.id);
-
-  const { data: latestAnyRun, error: latestAnyRunError } = await supabase
-    .from("ai_prompt_runs")
-    .select("audit_id,brand_name,raw_response,executed_at")
-    .in("prompt_id", templateIds)
-    .order("executed_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (latestAnyRunError) {
-    throw new Error(latestAnyRunError.message);
-  }
 
   const fallbackResult: BrandPresenceResult = {
     brandDetected: false,
@@ -119,11 +110,54 @@ export async function getDashboardData(args?: { auditId?: string | null }): Prom
     confidence: null
   };
 
-  const auditId = args?.auditId ?? ((latestAnyRun?.audit_id as string | null) ?? null);
-  const brandName = (latestAnyRun?.brand_name as string | null) ?? null;
-  const latestRaw = latestAnyRun?.raw_response ? parsePromptRunRaw(latestAnyRun.raw_response as string) : null;
-  const category = latestRaw?.category ?? null;
-  const executedAt = (latestAnyRun?.executed_at as string | null) ?? null;
+  const requestedAuditId = args?.auditId ?? null;
+  const userId = args?.userId ?? null;
+
+  const auditsQuery = supabase
+    .from("ai_audits")
+    .select("id,brand_name,created_at,user_id")
+    .order("created_at", { ascending: false });
+
+  const { data: latestAudit, error: latestAuditError } = requestedAuditId
+    ? await auditsQuery.eq("id", requestedAuditId).maybeSingle()
+    : userId
+      ? await auditsQuery.eq("user_id", userId).limit(1).maybeSingle()
+      : await auditsQuery.limit(1).maybeSingle();
+
+  if (latestAuditError) {
+    if (!latestAuditError.message.includes("ai_audits") && !latestAuditError.message.includes("relation")) {
+      throw new Error(latestAuditError.message);
+    }
+  }
+
+  if (userId && latestAudit && (latestAudit.user_id as string | null) !== userId) {
+    // If an explicit audit id is provided but doesn't belong to this user, return an empty dashboard.
+    const emptyPrompts: PromptResult[] = templates.map((t) =>
+      toPromptResult(t, {
+        runId: null,
+        executedAt: null,
+        promptAsked: null,
+        answerPreview: null,
+        citationCount: 0,
+        result: fallbackResult
+      })
+    );
+    const summary = calculateSummary(emptyPrompts);
+    const dashboard: DashboardResponse = {
+      audit: { auditId: null, brandName: null, category: null, executedAt: null },
+      summary: { ...summary, visibilityScore: 0, authorityDiversity: 0 },
+      trend: [],
+      prompts: emptyPrompts,
+      recommendations: []
+    };
+    dashboard.recommendations = getRecommendationsFromDashboard(dashboard);
+    return dashboard;
+  }
+
+  const auditId = (latestAudit?.id as string | null) ?? null;
+  const brandName = (latestAudit?.brand_name as string | null) ?? null;
+  const category = null;
+  const executedAt = (latestAudit?.created_at as string | null) ?? null;
 
   if (!auditId) {
     const emptyPrompts: PromptResult[] = templates.map((t) =>

@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { SignInForm } from "@/components/auth/sign-in-form";
+import { Suspense } from "react";
 
 export default function LoginPage() {
   return (
@@ -21,59 +22,15 @@ export default function LoginPage() {
               <p className="mt-2 text-sm text-slate-300">Sign in to your account to continue</p>
             </div>
 
-            <form className="mt-8 space-y-5">
-              <label className="block">
-                <div className="text-xs font-semibold text-slate-200">Email</div>
-                <div className="mt-2 relative">
-                  <input
-                    type="email"
-                    placeholder="name@example.com"
-                    autoComplete="email"
-                    className="h-10 w-full rounded-md border border-slate-800 bg-slate-950/40 px-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-                  />
-                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-slate-800 bg-slate-900 px-2 py-1 text-xs text-slate-400">
-                    …
-                  </div>
+            <Suspense
+              fallback={
+                <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900/30 px-3 py-2 text-sm text-slate-200">
+                  Loading…
                 </div>
-              </label>
-
-              <label className="block">
-                <div className="text-xs font-semibold text-slate-200">Password</div>
-                <div className="mt-2 relative">
-                  <input
-                    type="password"
-                    placeholder="Enter your password"
-                    autoComplete="current-password"
-                    className="h-10 w-full rounded-md border border-slate-800 bg-slate-950/40 px-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-                  />
-                  <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-slate-800 bg-slate-900 px-2 py-1 text-xs text-slate-400">
-                    …
-                  </div>
-                </div>
-              </label>
-
-              <button
-                type="button"
-                className="mt-2 inline-flex h-10 w-full items-center justify-center rounded-md bg-blue-600 text-sm font-medium text-white hover:bg-blue-500"
-              >
-                Sign in
-              </button>
-
-              <p className="text-center text-sm text-slate-400">
-                Don&apos;t have an account?{" "}
-                <Link href="/account" className="text-blue-400 hover:text-blue-300">
-                  Sign up
-                </Link>
-              </p>
-
-              <div className="pt-2 text-center text-sm text-slate-500">
-                Or{" "}
-                <Link href="/dashboard?demo=true" className="text-slate-300 hover:text-white">
-                  try the demo
-                </Link>{" "}
-                without signing in
-              </div>
-            </form>
+              }
+            >
+              <SignInForm />
+            </Suspense>
           </div>
         </div>
       </div>
