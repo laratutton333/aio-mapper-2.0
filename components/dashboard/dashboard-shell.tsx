@@ -4,15 +4,15 @@ import Link from "next/link";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/ui/cn";
 
 const NAV = [
   { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/prompt-explorer", label: "Prompt Explorer" },
-  { href: "/dashboard/brand-vs-competitors", label: "Brand vs Competitors" },
-  { href: "/dashboard/citations", label: "Citations" },
+  { href: "/dashboard/runs", label: "Prompt Explorer" },
+  { href: "/dashboard/prompts", label: "Prompts" },
   { href: "/dashboard/recommendations", label: "Recommendations" },
-  { href: "/dashboard/settings", label: "Settings" }
+  { href: "/dashboard/citations", label: "Citations" },
+  { href: "/dashboard/comparison", label: "Comparison" }
 ] as const;
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -38,7 +38,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-dvh">
           <aside className="hidden w-64 flex-col border-r border-slate-200 bg-slate-50 px-4 py-6 dark:border-slate-900 dark:bg-slate-950 md:flex">
             <div className="flex items-center justify-between gap-2">
-              <div className="text-sm font-semibold tracking-tight">AIO Mapper</div>
+              <Link href="/" className="text-sm font-semibold tracking-tight">
+                AIO Mapper
+              </Link>
               <Button variant="secondary" size="sm" type="button" onClick={toggleTheme}>
                 {isDark ? "Light" : "Dark"}
               </Button>
@@ -60,8 +62,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </nav>
 
             <div className="mt-auto rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 dark:border-slate-900 dark:bg-slate-950 dark:text-slate-400">
-              <div className="font-medium text-slate-900 dark:text-slate-100">John Doe</div>
-              <div>Enterprise Plan</div>
+              <div className="font-medium text-slate-900 dark:text-slate-100">
+                User (placeholder)
+              </div>
+              <div>Plan (placeholder)</div>
             </div>
           </aside>
 
@@ -73,4 +77,3 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-

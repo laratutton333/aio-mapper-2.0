@@ -5,10 +5,19 @@ import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DashboardResponse, PromptResult } from "@/types/dashboard";
 
 type IntentFilter = "informational" | "comparative" | "transactional" | "trust";
 type MentionFilter = "any" | "primary" | "secondary" | "implied" | "none";
+
+export type PromptExplorerRow = {
+  runId: string | null;
+  promptName: string;
+  intent: string;
+  promptAsked: string | null;
+  answerPreview: string | null;
+  citationCount: number | null;
+  mentionType: MentionFilter | null;
+};
 
 function normalizeIntent(intent: string): IntentFilter | null {
   const value = intent.trim().toLowerCase();
@@ -48,11 +57,13 @@ function intentLabel(value: IntentFilter) {
 }
 
 export function PromptExplorer({
-  audit,
+  brandName,
+  category,
   prompts
 }: {
-  audit: DashboardResponse["audit"];
-  prompts: PromptResult[];
+  brandName?: string | null;
+  category?: string | null;
+  prompts: PromptExplorerRow[];
 }) {
   const [query, setQuery] = React.useState<string>("");
   const [intent, setIntent] = React.useState<Record<IntentFilter, boolean>>({
@@ -75,19 +86,12 @@ export function PromptExplorer({
       const intentValue = normalizeIntent(p.intent);
       if (intentValue && !intent[intentValue]) return false;
 
-      const mentionValue = p.result.mentionType ?? "none";
-      const mentionMatches =
-        mention.any || mention[mentionValue as MentionFilter] || false;
+      const mentionValue = p.mentionType ?? "none";
+      const mentionMatches = mention.any || mention[mentionValue] || false;
       if (!mentionMatches) return false;
 
       if (!q) return true;
-      const haystack = [
-        p.promptName,
-        p.promptAsked ?? "",
-        p.answerPreview ?? "",
-        p.intent,
-        p.result.mentionType
-      ]
+      const haystack = [p.promptName, p.promptAsked ?? "", p.answerPreview ?? "", p.intent, mentionValue]
         .join(" ")
         .toLowerCase();
 
@@ -101,7 +105,7 @@ export function PromptExplorer({
         <CardHeader>
           <CardTitle>Filters</CardTitle>
           <CardDescription className="text-xs">
-            Narrow down prompts by intent and presence.
+            UI-only: filters work locally once rows are provided.
           </CardDescription>
         </CardHeader>
         <div className="mt-4 space-y-6">
@@ -118,9 +122,7 @@ export function PromptExplorer({
           </div>
 
           <div>
-            <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              Intent Type
-            </div>
+            <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Intent Type</div>
             <div className="mt-3 space-y-2">
               {(Object.keys(intent) as IntentFilter[]).map((key) => (
                 <label key={key} className="flex items-center gap-2 text-sm">
@@ -136,9 +138,7 @@ export function PromptExplorer({
           </div>
 
           <div>
-            <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              Brand Presence
-            </div>
+            <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Brand Presence</div>
             <div className="mt-3 space-y-2">
               {(Object.keys(mention) as MentionFilter[]).map((key) => (
                 <label key={key} className="flex items-center gap-2 text-sm">
@@ -158,78 +158,76 @@ export function PromptExplorer({
       <div className="lg:col-span-8">
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm text-slate-600 dark:text-slate-400">
-            {audit.brandName ? (
+            {brandName ? (
               <>
-                Brand: <span className="font-medium text-slate-900 dark:text-slate-100">{audit.brandName}</span>
-                {audit.category ? (
+                Brand:{" "}
+                <span className="font-medium text-slate-900 dark:text-slate-100">{brandName}</span>
+                {category ? (
                   <>
                     {" "}
-                    · Category: <span className="font-medium text-slate-900 dark:text-slate-100">{audit.category}</span>
+                    · Category:{" "}
+                    <span className="font-medium text-slate-900 dark:text-slate-100">{category}</span>
                   </>
                 ) : null}
               </>
             ) : (
-              "Run an audit to populate results."
+              "TODO: show audit metadata."
             )}
           </div>
           <Badge>{filtered.length} results</Badge>
         </div>
 
-        <div className="mt-4 space-y-4">
-          {filtered.map((prompt) => (
-            <Card key={prompt.promptId}>
-              <CardHeader>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge>{prompt.intent}</Badge>
-                  <Badge className="bg-slate-900 text-white dark:bg-slate-800">Completed</Badge>
-                </div>
-                <div className="mt-3 flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold">{prompt.promptName}</div>
-                    {prompt.promptAsked ? (
-                      <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                        {prompt.promptAsked}
+        {filtered.length === 0 ? (
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+            No prompt rows loaded.
+          </div>
+        ) : (
+          <div className="mt-4 space-y-4">
+            {filtered.map((prompt) => (
+              <Card key={`${prompt.promptName}-${prompt.runId ?? "none"}`}>
+                <CardHeader>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge>{prompt.intent}</Badge>
+                    <Badge className="bg-slate-900 text-white dark:bg-slate-800">Completed</Badge>
+                  </div>
+                  <div className="mt-3 flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold">{prompt.promptName}</div>
+                      {prompt.promptAsked ? (
+                        <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                          {prompt.promptAsked}
+                        </div>
+                      ) : null}
+                      {prompt.answerPreview ? (
+                        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                          {prompt.answerPreview}
+                        </div>
+                      ) : null}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Badge className="border-slate-800 bg-slate-900 text-slate-200">
+                          Mention: {prompt.mentionType ?? "none"}
+                        </Badge>
+                        <Badge className="text-slate-600 dark:text-slate-300">
+                          {prompt.citationCount ?? "—"} citations
+                        </Badge>
                       </div>
-                    ) : null}
-                    {prompt.answerPreview ? (
-                      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                        {prompt.answerPreview}
-                      </div>
-                    ) : null}
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Badge
-                        className={
-                          prompt.result.mentionType === "primary"
-                            ? "border-emerald-900/40 bg-emerald-950/50 text-emerald-200"
-                            : prompt.result.mentionType === "secondary"
-                              ? "border-blue-900/40 bg-blue-950/50 text-blue-200"
-                              : prompt.result.mentionType === "implied"
-                                ? "border-amber-900/40 bg-amber-950/50 text-amber-200"
-                                : "border-slate-800 bg-slate-900 text-slate-200"
-                        }
-                      >
-                        {audit.brandName ?? "Brand"} ({prompt.result.mentionType})
-                      </Badge>
-                      <Badge className="text-slate-600 dark:text-slate-300">
-                        {prompt.citationCount} citations
-                      </Badge>
+                    </div>
+                    <div className="shrink-0">
+                      {prompt.runId ? (
+                        <Link
+                          className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
+                          href={`/dashboard/runs/${prompt.runId}`}
+                        >
+                          View
+                        </Link>
+                      ) : null}
                     </div>
                   </div>
-                  <div className="shrink-0">
-                    {prompt.runId ? (
-                      <Link
-                        className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
-                        href={`/dashboard/prompt-explorer/${prompt.runId}`}
-                      >
-                        View
-                      </Link>
-                    ) : null}
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
