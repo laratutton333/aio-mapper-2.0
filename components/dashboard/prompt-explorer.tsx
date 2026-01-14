@@ -193,8 +193,8 @@ export function PromptExplorer({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-12">
-      <Card className="lg:col-span-4">
+    <div className="grid gap-4 xl:grid-cols-12">
+      <Card className="xl:col-span-4">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Filters</CardTitle>
@@ -254,7 +254,7 @@ export function PromptExplorer({
         </div>
       </Card>
 
-      <div className="lg:col-span-8">
+      <div className="xl:col-span-8">
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm text-slate-600 dark:text-slate-400">
             {brandName ? (
@@ -290,7 +290,7 @@ export function PromptExplorer({
                 className="w-full text-left"
                 disabled={!prompt.runId}
               >
-                <Card className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                <Card className="overflow-hidden transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/40">
                   <CardHeader>
                     <div className="flex flex-wrap items-center gap-2">
                       <span
@@ -311,16 +311,16 @@ export function PromptExplorer({
                         <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {prompt.promptName}
                         </div>
-                        <div className="mt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <div className="mt-2 flex min-w-0 items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                           <span className="text-slate-400">▸</span>
-                          <span className="truncate">
+                          <span className="min-w-0 flex-1 truncate">
                             {prompt.promptAsked ??
                               (prompt.runId ? getDemoPromptPreview(prompt.runId)?.promptAskedPreview : null) ??
                               "—"}
                           </span>
                         </div>
 
-                        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                        <div className="mt-3 break-words rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
                           {prompt.runId
                             ? getDemoPromptPreview(prompt.runId)?.answerPreview ?? "—"
                             : prompt.answerPreview ?? "—"}
@@ -384,7 +384,7 @@ export function PromptExplorer({
             aria-label="Close prompt detail"
           />
 
-          <div className="absolute right-0 top-0 h-full w-full max-w-xl overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
+          <div className="absolute right-0 top-0 h-full w-full max-w-xl overflow-y-auto overflow-x-hidden border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -416,14 +416,14 @@ export function PromptExplorer({
             <div className="mt-6 space-y-6">
               <div>
                 <div className="text-xs font-semibold tracking-wide text-slate-400">PROMPT ASKED</div>
-                <div className="mt-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-100">
+                <div className="mt-3 break-words rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-100">
                   {selectedDetail.promptAsked}
                 </div>
               </div>
 
               <div>
                 <div className="text-xs font-semibold tracking-wide text-slate-400">AI ANSWER</div>
-                <div className="mt-3 whitespace-pre-wrap rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-100">
+                <div className="mt-3 break-words whitespace-pre-wrap rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-100">
                   {selectedDetail.answer}
                 </div>
               </div>
