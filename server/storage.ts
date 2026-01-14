@@ -445,7 +445,12 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createBrand(insertBrand: InsertBrand): Promise<Brand> {
     const id = randomUUID();
-    const brand: Brand = { ...insertBrand, id };
+    const brand: Brand = {
+      ...insertBrand,
+      id,
+      primaryDomain: insertBrand.primaryDomain ?? null,
+      brandVariants: insertBrand.brandVariants ?? null,
+    };
     this.brands.set(id, brand);
     return brand;
   }
@@ -461,7 +466,12 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createAudit(insertAudit: InsertAudit): Promise<Audit> {
     const id = randomUUID();
-    const audit: Audit = { ...insertAudit, id, createdAt: new Date() };
+    const audit: Audit = {
+      ...insertAudit,
+      id,
+      createdAt: new Date(),
+      status: insertAudit.status ?? "pending",
+    };
     this.audits.set(id, audit);
     return audit;
   }
@@ -473,7 +483,11 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createCompetitor(insertCompetitor: InsertCompetitor): Promise<Competitor> {
     const id = randomUUID();
-    const competitor: Competitor = { ...insertCompetitor, id };
+    const competitor: Competitor = {
+      ...insertCompetitor,
+      id,
+      domain: insertCompetitor.domain ?? null,
+    };
     this.competitors.set(id, competitor);
     return competitor;
   }
@@ -489,7 +503,12 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createPromptTemplate(insertTemplate: InsertPromptTemplate): Promise<PromptTemplate> {
     const id = randomUUID();
-    const template: PromptTemplate = { ...insertTemplate, id };
+    const template: PromptTemplate = {
+      ...insertTemplate,
+      id,
+      isActive: insertTemplate.isActive ?? null,
+      sortOrder: insertTemplate.sortOrder ?? null,
+    };
     this.promptTemplates.set(id, template);
     return template;
   }
@@ -507,7 +526,15 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createPromptRun(insertRun: InsertPromptRun): Promise<PromptRun> {
     const id = randomUUID();
-    const run: PromptRun = { ...insertRun, id, executedAt: new Date() };
+    const run: PromptRun = {
+      ...insertRun,
+      id,
+      executedAt: new Date(),
+      llmModel: insertRun.llmModel ?? "",
+      runStatus: insertRun.runStatus ?? "completed",
+      rawAnswer: insertRun.rawAnswer ?? null,
+      promptText: insertRun.promptText ?? null,
+    };
     this.promptRuns.set(id, run);
     return run;
   }
@@ -521,7 +548,14 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createMention(insertMention: InsertPromptMention): Promise<PromptMention> {
     const id = randomUUID();
-    const mention: PromptMention = { ...insertMention, id };
+    const mention: PromptMention = {
+      ...insertMention,
+      id,
+      mentionPosition: insertMention.mentionPosition ?? null,
+      confidence: insertMention.confidence ?? null,
+      isCited: insertMention.isCited ?? null,
+      isTargetBrand: insertMention.isTargetBrand ?? null,
+    };
     this.promptMentions.set(id, mention);
     return mention;
   }
@@ -545,7 +579,12 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createCitation(insertCitation: InsertCitation): Promise<Citation> {
     const id = randomUUID();
-    const citation: Citation = { ...insertCitation, id };
+    const citation: Citation = {
+      ...insertCitation,
+      id,
+      authorityScore: insertCitation.authorityScore ?? null,
+      sourceDomain: insertCitation.sourceDomain ?? null,
+    };
     this.citations.set(id, citation);
     return citation;
   }
@@ -557,7 +596,15 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createMetric(insertMetric: InsertPromptMetric): Promise<PromptMetric> {
     const id = randomUUID();
-    const metric: PromptMetric = { ...insertMetric, id };
+    const metric: PromptMetric = {
+      ...insertMetric,
+      id,
+      presenceRate: insertMetric.presenceRate ?? null,
+      citationRate: insertMetric.citationRate ?? null,
+      recommendationRate: insertMetric.recommendationRate ?? null,
+      authorityDiversity: insertMetric.authorityDiversity ?? null,
+      compositeScore: insertMetric.compositeScore ?? null,
+    };
     this.promptMetrics.set(id, metric);
     return metric;
   }
@@ -573,7 +620,13 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
   async createRecommendation(insertRec: InsertRecommendation): Promise<Recommendation> {
     const id = randomUUID();
-    const rec: Recommendation = { ...insertRec, id };
+    const rec: Recommendation = {
+      ...insertRec,
+      id,
+      status: insertRec.status ?? "pending",
+      evidencePromptRunId: insertRec.evidencePromptRunId ?? null,
+      rationale: insertRec.rationale ?? null,
+    };
     this.recommendations.set(id, rec);
     return rec;
   }
@@ -606,10 +659,11 @@ Overall, Acme Corp is the preferred choice for security-conscious enterprises.`,
 
     const avgMetrics = validMetrics.reduce(
       (acc, m) => ({
-        presenceRate: acc.presenceRate + m.presenceRate / validMetrics.length,
-        citationRate: acc.citationRate + m.citationRate / validMetrics.length,
-        recommendationRate: acc.recommendationRate + m.recommendationRate / validMetrics.length,
-        compositeScore: acc.compositeScore + m.compositeScore / validMetrics.length,
+        presenceRate: acc.presenceRate + (m.presenceRate ?? 0) / validMetrics.length,
+        citationRate: acc.citationRate + (m.citationRate ?? 0) / validMetrics.length,
+        recommendationRate:
+          acc.recommendationRate + (m.recommendationRate ?? 0) / validMetrics.length,
+        compositeScore: acc.compositeScore + (m.compositeScore ?? 0) / validMetrics.length,
       }),
       { presenceRate: 0, citationRate: 0, recommendationRate: 0, compositeScore: 0 }
     );
