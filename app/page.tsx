@@ -3,33 +3,48 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <>
-      <div className="badge">Vercel-friendly · App Router · TypeScript</div>
-      <h1 style={{ marginTop: 16, marginBottom: 8 }}>SaaS Dashboard Starter</h1>
-      <p className="muted" style={{ marginTop: 0 }}>
-        A clean Next.js foundation with a dashboard route and API routes.
+      <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700">
+        Vercel-native · App Router · Route Handlers
+      </div>
+      <h1 className="mt-4 text-3xl font-semibold tracking-tight">
+        AIO Mapper
+      </h1>
+      <p className="mt-2 max-w-2xl text-sm text-slate-600">
+        Structured, server-only AI visibility checks with Supabase persistence
+        and a dashboard contract the UI can render without parsing model text.
       </p>
 
-      <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-        <Link className="card" href="/dashboard" style={{ maxWidth: 420 }}>
-          <strong>Go to Dashboard</strong>
-          <div className="muted" style={{ marginTop: 6 }}>
-            Example authenticated area (auth not wired yet).
+      <div className="mt-6 grid gap-3 md:grid-cols-3">
+        <Link
+          className="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50"
+          href="/dashboard"
+        >
+          <div className="text-sm font-semibold">Dashboard</div>
+          <div className="mt-1 text-sm text-slate-600">
+            Run checks and view summary metrics.
           </div>
         </Link>
 
-        <a
-          className="card"
-          href="/api/health"
-          style={{ maxWidth: 420 }}
-          rel="noreferrer"
+        <Link
+          className="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50"
+          href="/prompts"
         >
-          <strong>Health Check</strong>
-          <div className="muted" style={{ marginTop: 6 }}>
-            Returns JSON from an App Router route handler.
+          <div className="text-sm font-semibold">Prompts</div>
+          <div className="mt-1 text-sm text-slate-600">
+            Manage active prompt templates.
           </div>
-        </a>
+        </Link>
+
+        <Link
+          className="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50"
+          href="/recommendations"
+        >
+          <div className="text-sm font-semibold">Recommendations</div>
+          <div className="mt-1 text-sm text-slate-600">
+            Actionable next steps based on results.
+          </div>
+        </Link>
       </div>
     </>
   );
 }
-
