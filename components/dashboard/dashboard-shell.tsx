@@ -9,7 +9,7 @@ import { cn } from "@/components/ui/cn";
 const NAV = [
   { href: "/dashboard", label: "Overview" },
   { href: "/dashboard/runs", label: "Prompt Explorer" },
-  { href: "/dashboard/prompts", label: "Prompts" },
+  { href: "/dashboard/prompts", label: "Brand vs Competitors" },
   { href: "/dashboard/recommendations", label: "Recommendations" },
   { href: "/dashboard/citations", label: "Citations" },
   { href: "/dashboard/comparison", label: "Comparison" }
