@@ -1,4 +1,4 @@
-import { getServerEnv } from "@/lib/env";
+import { getOpenAiEnv } from "@/lib/env.server";
 
 export type OpenAiResponsesApiArgs = {
   model: string;
@@ -13,7 +13,7 @@ export async function runOpenAiJsonSchema({
   jsonSchema,
   schemaName
 }: OpenAiResponsesApiArgs): Promise<{ raw: string; outputText: string }> {
-  const env = getServerEnv();
+  const env = getOpenAiEnv();
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {

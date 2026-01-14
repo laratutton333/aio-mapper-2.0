@@ -8,6 +8,10 @@ This project uses Supabase Auth with cookie-based sessions via `@supabase/ssr`.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only; used for admin operations)
 
+Env loading is split to avoid client/server boundary issues:
+- Client-safe: `lib/env.public.ts` (only `NEXT_PUBLIC_*`)
+- Server-only: `lib/env.server.ts` (secrets; includes `import "server-only"`)
+
 ## Required Supabase settings
 
 In Supabase Dashboard:
@@ -39,4 +43,3 @@ So the callback URL must be allow-listed.
 - Session refresh + dashboard guard: `middleware.ts`
 
 In demo mode (`?demo=true`), `/dashboard` routes remain accessible without auth.
-

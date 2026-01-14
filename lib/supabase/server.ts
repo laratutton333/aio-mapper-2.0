@@ -2,15 +2,16 @@ import { cookies } from "next/headers";
 import { createServerClient, type SetAllCookies } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
-import { getServerEnv } from "@/lib/env";
+import { getPublicEnv } from "@/lib/env.public";
+import { getSupabaseServiceRoleEnv } from "@/lib/env.server";
 
 export async function createSupabaseServerClient() {
-  const env = getServerEnv();
+  const publicEnv = getPublicEnv();
   const cookieStore = await cookies();
 
   return createServerClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    publicEnv.NEXT_PUBLIC_SUPABASE_URL,
+    publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -27,8 +28,9 @@ export async function createSupabaseServerClient() {
 }
 
 export function createSupabaseAdminClient() {
-  const env = getServerEnv();
-  return createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+  const publicEnv = getPublicEnv();
+  const serverEnv = getSupabaseServiceRoleEnv();
+  return createClient(publicEnv.NEXT_PUBLIC_SUPABASE_URL, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false }
   });
 }

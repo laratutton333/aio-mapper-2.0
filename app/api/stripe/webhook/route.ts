@@ -1,11 +1,11 @@
 import Stripe from "stripe";
 
-import { getServerEnv } from "@/lib/env";
+import { getStripeEnv } from "@/lib/env.server";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const env = getServerEnv();
+  const env = getStripeEnv();
   const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
     apiVersion: "2024-06-20"
   });
@@ -37,4 +37,3 @@ export async function POST(req: Request) {
 
   return new Response("ok", { status: 200 });
 }
-
