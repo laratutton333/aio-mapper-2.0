@@ -10,6 +10,8 @@ import { getDemoDashboardData } from "@/lib/demo/demo-dashboard";
 import { getDashboardData } from "@/lib/dashboard/getDashboardData";
 import { requireUser } from "@/lib/auth/requireUser";
 import { getCompetitorsForAudit } from "@/lib/competitors/getCompetitorsForAudit";
+import { getAuditStatus } from "@/lib/audits/getAuditStatus";
+import { AuditRunningBanner } from "@/components/dashboard/audit-running-banner";
 
 function formatPercent(value: number) {
   return `${Math.round(value * 100)}%`;
@@ -115,6 +117,11 @@ export default async function DashboardOverviewPage({
   const data = demo ?? dashboard;
   const brandName = data?.audit.brandName ?? "your brand";
 
+  const auditStatus =
+    !isDemo && user && auditIdParam
+      ? await getAuditStatus({ auditId: auditIdParam, userId: user.id })
+      : null;
+
   const competitors =
     isDemo
       ? demo?.demo.competitors ?? []
@@ -158,6 +165,14 @@ export default async function DashboardOverviewPage({
   return (
     <div className="flex flex-col gap-6">
       {isDemo ? <DemoBanner /> : null}
+      {!isDemo && auditStatus && auditStatus.status !== "completed" ? (
+        <AuditRunningBanner
+          auditId={auditStatus.auditId}
+          status={auditStatus.status}
+          runCount={auditStatus.runCount}
+          totalPrompts={data?.prompts.length ?? 1}
+        />
+      ) : null}
 
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
