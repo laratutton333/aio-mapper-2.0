@@ -39,9 +39,9 @@ function DeltaPill({ value }: { value: number }) {
 
 function DemoBanner() {
   return (
-    <div className="rounded-xl border border-blue-600/40 bg-blue-600/10 px-4 py-3 text-sm text-slate-200">
-      <span className="font-semibold text-blue-300">Demo Mode</span>{" "}
-      <span className="text-slate-300">
+    <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-slate-900 dark:border-blue-600/40 dark:bg-blue-600/10 dark:text-slate-100">
+      <span className="font-semibold text-blue-700 dark:text-blue-300">Demo Mode</span>{" "}
+      <span className="text-slate-700 dark:text-slate-300">
         Sample data only. Nothing here is real, exportable, or saved.
       </span>
     </div>
@@ -50,7 +50,7 @@ function DemoBanner() {
 
 function IntentBadge({ value }: { value: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-800 bg-slate-950 px-2 py-0.5 text-xs text-slate-300">
+    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
       {value}
     </span>
   );
@@ -62,8 +62,8 @@ function StatusBadge({ value }: { value: "Completed" | "Queued" }) {
       className={cn(
         "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold",
         value === "Completed"
-          ? "bg-blue-600/15 text-blue-300"
-          : "bg-slate-800/50 text-slate-300"
+          ? "bg-blue-50 text-blue-700 dark:bg-blue-600/15 dark:text-blue-300"
+          : "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-300"
       )}
     >
       {value}
@@ -83,12 +83,12 @@ function PresenceBadge({ brandName, mentionType }: { brandName: string; mentionT
 
   const className =
     mentionType === "primary"
-      ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+      ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300"
       : mentionType === "secondary"
-        ? "bg-blue-600/10 text-blue-300 border-blue-600/20"
+        ? "bg-blue-600/10 text-blue-700 border-blue-600/20 dark:text-blue-300"
         : mentionType === "implied"
-          ? "bg-slate-800/40 text-slate-300 border-slate-700"
-          : "bg-slate-950 text-slate-400 border-slate-800";
+          ? "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800/40 dark:text-slate-300 dark:border-slate-700"
+          : "bg-white text-slate-500 border-slate-200 dark:bg-slate-950 dark:text-slate-400 dark:border-slate-800";
 
   return (
     <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs", className)}>
@@ -290,7 +290,7 @@ export default async function DashboardOverviewPage({
             </div>
             <Link
               href={isDemo ? "/dashboard/runs?demo=true" : "/dashboard/runs"}
-              className="text-sm text-slate-300 hover:text-white"
+              className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
             >
               View All →
             </Link>
@@ -380,7 +380,7 @@ export default async function DashboardOverviewPage({
           <Card>
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle>Competitors Tracked</CardTitle>
-              <span className="rounded-md bg-slate-900 px-2 py-0.5 text-xs text-slate-200">
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700 dark:bg-slate-900 dark:text-slate-200">
                 {competitors.length}
               </span>
             </CardHeader>
@@ -398,7 +398,7 @@ export default async function DashboardOverviewPage({
                     </div>
                     <button
                       type="button"
-                      className="rounded-md border border-slate-800 bg-slate-950/40 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-900"
+                      className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
                       disabled
                       title={isDemo ? "Demo mode is read-only." : "Competitor comparisons are read-only in this view."}
                     >

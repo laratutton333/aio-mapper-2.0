@@ -23,7 +23,7 @@ function pillClass(type: DemoCitationType) {
     case "brand_owned":
       return "bg-blue-600/10 text-blue-300 border-blue-600/20";
     case "wikipedia":
-      return "bg-slate-800/50 text-slate-200 border-slate-700";
+      return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800/50 dark:text-slate-200 dark:border-slate-700";
     case "publisher":
       return "bg-indigo-500/10 text-indigo-300 border-indigo-500/20";
     case "competitor":
@@ -181,7 +181,7 @@ export default async function DashboardCitationsPage({
               TOTAL CITATIONS
             </CardTitle>
           </CardHeader>
-          <div className="mt-1 text-3xl font-semibold text-slate-100">
+          <div className="mt-1 text-3xl font-semibold text-slate-900 dark:text-slate-100">
             {data ? data.totals.totalCitations : "—"}
           </div>
           <CardDescription className="mt-2">across all prompts</CardDescription>
@@ -193,11 +193,11 @@ export default async function DashboardCitationsPage({
               BRAND-OWNED
             </CardTitle>
           </CardHeader>
-          <div className="mt-1 text-3xl font-semibold text-slate-100">
+          <div className="mt-1 text-3xl font-semibold text-slate-900 dark:text-slate-100">
             {data ? percent(data.totals.brandOwnedRate) : "—"}
           </div>
           <div className="mt-3">
-            <Progress value={data ? Math.round(data.totals.brandOwnedRate * 100) : 0} className="bg-slate-800" />
+            <Progress value={data ? Math.round(data.totals.brandOwnedRate * 100) : 0} />
           </div>
         </Card>
 
@@ -207,7 +207,7 @@ export default async function DashboardCitationsPage({
               AUTHORITY SCORE
             </CardTitle>
           </CardHeader>
-          <div className="mt-1 text-3xl font-semibold text-slate-100">
+          <div className="mt-1 text-3xl font-semibold text-slate-900 dark:text-slate-100">
             {data ? `${Math.round(data.totals.averageAuthority)}%` : "—"}
           </div>
           <CardDescription className="mt-2">average across sources</CardDescription>
@@ -219,7 +219,7 @@ export default async function DashboardCitationsPage({
               MISSING CITATIONS
             </CardTitle>
           </CardHeader>
-          <div className="mt-1 text-3xl font-semibold text-slate-100">
+          <div className="mt-1 text-3xl font-semibold text-slate-900 dark:text-slate-100">
             {data ? data.totals.missingCitations : "—"}
           </div>
           <CardDescription className="mt-2">prompts without sources</CardDescription>
@@ -307,7 +307,9 @@ export default async function DashboardCitationsPage({
                       {row.count} {row.count === 1 ? "citation" : "citations"}
                     </div>
                   </div>
-                  <div className="text-sm font-semibold text-slate-100">{(row.percent * 100).toFixed(1)}%</div>
+                  <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    {(row.percent * 100).toFixed(1)}%
+                  </div>
                 </div>
               ))}
             </div>

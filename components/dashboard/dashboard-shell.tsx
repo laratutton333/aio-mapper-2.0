@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
@@ -16,9 +18,18 @@ const ANALYTICS_NAV = [
 
 const CONFIG_NAV = [{ href: "/dashboard/settings", label: "Settings" }] as const;
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  userEmail,
+  plan
+}: {
+  children: React.ReactNode;
+  userEmail: string | null;
+  plan: string | null;
+}) {
   const [isDark, setIsDark] = React.useState<boolean>(true);
   const [isDemo, setIsDemo] = React.useState<boolean>(false);
+  const pathname = usePathname();
 
   React.useEffect(() => {
     const stored = window.localStorage.getItem("aio-theme");
@@ -54,10 +65,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-dvh">
           <aside className="hidden w-64 flex-col border-r border-slate-200 bg-slate-50 px-4 py-6 dark:border-slate-900 dark:bg-slate-950 md:flex">
             <div className="flex items-center justify-between gap-2">
-              <Link href="/" className="text-sm font-semibold tracking-tight">
-                AIO Mapper
+              <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+                <Image src="/brand/logos/logo-32.png" alt="AIO Mapper" width={18} height={18} priority />
+                <span>AIO Mapper</span>
               </Link>
-              <Button variant="secondary" size="sm" type="button" onClick={toggleTheme}>
+              <Button variant="outline" size="sm" type="button" onClick={toggleTheme}>
                 {isDark ? "Light" : "Dark"}
               </Button>
             </div>
@@ -78,7 +90,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={withDemo(item.href)}
-                  className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                  aria-current={pathname === item.href ? "page" : undefined}
+                  className={cn(
+                    "block rounded-md px-3 py-2 text-sm transition-colors",
+                    pathname === item.href
+                      ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-50"
+                      : "text-slate-700 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                  )}
                 >
                   {item.label}
                 </Link>
@@ -91,7 +109,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={withDemo(item.href)}
-                  className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                  aria-current={pathname === item.href ? "page" : undefined}
+                  className={cn(
+                    "block rounded-md px-3 py-2 text-sm transition-colors",
+                    pathname === item.href
+                      ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-50"
+                      : "text-slate-700 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                  )}
                 >
                   {item.label}
                 </Link>
@@ -100,9 +124,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
             <div className="mt-auto rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 dark:border-slate-900 dark:bg-slate-950 dark:text-slate-400">
               <div className="font-medium text-slate-900 dark:text-slate-100">
-                User (placeholder)
+                {userEmail ?? (isDemo ? "Demo User" : "User")}
               </div>
-              <div>Plan (placeholder)</div>
+              <div>{plan ?? "Free"}</div>
             </div>
           </aside>
 

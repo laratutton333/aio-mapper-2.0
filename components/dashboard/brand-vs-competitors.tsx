@@ -27,7 +27,12 @@ function overallScore(row: BrandMetrics) {
 
 function MetricPill({ ok }: { ok: boolean }) {
   return (
-    <span className={cn("text-sm font-semibold", ok ? "text-emerald-300" : "text-slate-400")}>
+    <span
+      className={cn(
+        "text-sm font-semibold",
+        ok ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"
+      )}
+    >
       ~ Leading
     </span>
   );
@@ -47,10 +52,10 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-md px-3 py-2 text-sm transition-colors",
+        "rounded-lg px-3 py-2 text-sm transition-colors",
         active
-          ? "bg-slate-950 text-slate-100 shadow-sm shadow-black/20 dark:bg-slate-900"
-          : "text-slate-500 hover:text-slate-200"
+          ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-100"
+          : "text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/40 dark:hover:text-slate-200"
       )}
     >
       {children}
@@ -60,7 +65,7 @@ function TabButton({
 
 function Legend() {
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
       <div className="flex items-center gap-2">
         <span className="h-2 w-3 rounded-sm bg-blue-500" />
         <span>Presence Rate</span>
@@ -81,32 +86,40 @@ function TripleBarRow({ row }: { row: BrandMetrics }) {
   return (
     <div className="grid gap-3 sm:grid-cols-12 sm:items-center">
       <div className="min-w-0 sm:col-span-3">
-        <div className="truncate text-sm font-semibold text-slate-100">{row.brand.name}</div>
+        <div className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+          {row.brand.name}
+        </div>
       </div>
       <div className="space-y-2 sm:col-span-9">
         <div className="flex items-center gap-2">
-          <div className="h-2 flex-1 rounded-full bg-slate-800">
+          <div className="h-2 flex-1 rounded-full bg-slate-200 dark:bg-slate-800">
             <div className="h-2 rounded-full bg-blue-500" style={{ width: `${row.presence * 100}%` }} />
           </div>
-          <div className="w-10 text-right text-xs text-slate-400">{percent(row.presence)}</div>
+          <div className="w-10 text-right text-xs text-slate-500 dark:text-slate-400">
+            {percent(row.presence)}
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-2 flex-1 rounded-full bg-slate-800">
+          <div className="h-2 flex-1 rounded-full bg-slate-200 dark:bg-slate-800">
             <div
               className="h-2 rounded-full bg-emerald-400"
               style={{ width: `${row.citations * 100}%` }}
             />
           </div>
-          <div className="w-10 text-right text-xs text-slate-400">{percent(row.citations)}</div>
+          <div className="w-10 text-right text-xs text-slate-500 dark:text-slate-400">
+            {percent(row.citations)}
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-2 flex-1 rounded-full bg-slate-800">
+          <div className="h-2 flex-1 rounded-full bg-slate-200 dark:bg-slate-800">
             <div
               className="h-2 rounded-full bg-slate-300"
               style={{ width: `${row.recommendations * 100}%` }}
             />
           </div>
-          <div className="w-10 text-right text-xs text-slate-400">{percent(row.recommendations)}</div>
+          <div className="w-10 text-right text-xs text-slate-500 dark:text-slate-400">
+            {percent(row.recommendations)}
+          </div>
         </div>
       </div>
     </div>
@@ -134,7 +147,7 @@ function OverviewCharts({ data, demoMode }: { data: BrandVsCompetitorsData; demo
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <span className="text-slate-300">Share of AI Recommendations</span>
+            <span className="text-slate-700 dark:text-slate-300">Share of AI Recommendations</span>
             {demoMode ? (
               <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
             ) : null}
@@ -147,11 +160,11 @@ function OverviewCharts({ data, demoMode }: { data: BrandVsCompetitorsData; demo
             .map((row) => (
               <div key={row.brand.id}>
                 <div className="flex items-center justify-between text-sm">
-                  <div className="text-slate-200">{row.brand.name}</div>
-                  <div className="text-slate-200">{percent(row.recommendations)}</div>
+                  <div className="text-slate-900 dark:text-slate-200">{row.brand.name}</div>
+                  <div className="text-slate-900 dark:text-slate-200">{percent(row.recommendations)}</div>
                 </div>
                 <div className="mt-2">
-                  <Progress value={Math.round(row.recommendations * 100)} className="bg-slate-800" />
+                  <Progress value={Math.round(row.recommendations * 100)} />
                 </div>
               </div>
             ))}
@@ -197,8 +210,8 @@ function DetailedTable({ data, demoMode }: { data: BrandVsCompetitorsData; demoM
 
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-[720px] w-full text-left text-sm">
-          <thead className="text-xs text-slate-400">
-            <tr className="border-b border-slate-800">
+          <thead className="text-xs text-slate-500 dark:text-slate-400">
+            <tr className="border-b border-slate-200 dark:border-slate-800">
               <th className="px-4 py-3 font-semibold">Brand</th>
               <th className="px-4 py-3 font-semibold">Presence</th>
               <th className="px-4 py-3 font-semibold">Citations</th>
@@ -206,25 +219,29 @@ function DetailedTable({ data, demoMode }: { data: BrandVsCompetitorsData; demoM
               <th className="px-4 py-3 text-right font-semibold">Overall Score</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-900">
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-900">
             {rows.map((row) => {
               const isPrimary = row.brand.id === data.primary.id;
               return (
-                <tr key={row.brand.id} className={cn(isPrimary ? "bg-blue-600/5" : "")}>
+                <tr key={row.brand.id} className={cn(isPrimary ? "bg-blue-600/5" : "", "hover:bg-slate-50 dark:hover:bg-slate-900/30")}>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-slate-100">{row.brand.name}</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">
+                        {row.brand.name}
+                      </span>
                       {isPrimary ? (
-                        <span className="rounded-full border border-slate-800 bg-slate-950 px-2 py-0.5 text-xs text-slate-200">
+                        <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
                           You
                         </span>
                       ) : null}
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-slate-100">{percent(row.presence)}</td>
-                  <td className="px-4 py-4 text-slate-100">{percent(row.citations)}</td>
-                  <td className="px-4 py-4 text-slate-100">{percent(row.recommendations)}</td>
-                  <td className="px-4 py-4 text-right font-semibold text-slate-100">{percent(row.overall)}</td>
+                  <td className="px-4 py-4 text-slate-900 dark:text-slate-100">{percent(row.presence)}</td>
+                  <td className="px-4 py-4 text-slate-900 dark:text-slate-100">{percent(row.citations)}</td>
+                  <td className="px-4 py-4 text-slate-900 dark:text-slate-100">{percent(row.recommendations)}</td>
+                  <td className="px-4 py-4 text-right font-semibold text-slate-900 dark:text-slate-100">
+                    {percent(row.overall)}
+                  </td>
                 </tr>
               );
             })}
@@ -306,8 +323,12 @@ export function BrandVsCompetitors({
             </CardHeader>
             <div className="mt-1 flex items-end justify-between gap-4">
               <div>
-                <div className="text-3xl font-semibold text-slate-100">{percent(card.value)}</div>
-                <div className="mt-1 text-xs text-slate-400">vs {percent(card.avg)} competitor avg</div>
+                <div className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+                  {percent(card.value)}
+                </div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  vs {percent(card.avg)} competitor avg
+                </div>
               </div>
               <MetricPill ok={card.leading} />
             </div>
@@ -315,7 +336,7 @@ export function BrandVsCompetitors({
         ))}
       </div>
 
-      <div className="flex w-full flex-wrap items-center gap-1 rounded-xl border border-slate-800 bg-slate-950/40 p-1">
+      <div className="flex w-full flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-950/40">
         <TabButton active={view === "overview"} onClick={() => setView("overview")}>
           Overview
         </TabButton>

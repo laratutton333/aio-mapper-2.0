@@ -41,8 +41,8 @@ export function AuditRunningBanner({
       className={cn(
         "rounded-xl border px-4 py-3 text-sm",
         status === "running"
-          ? "border-blue-600/40 bg-blue-600/10 text-slate-200"
-          : "border-rose-500/30 bg-rose-500/10 text-rose-200"
+          ? "border-blue-200 bg-blue-50 text-slate-900 dark:border-blue-600/40 dark:bg-blue-600/10 dark:text-slate-100"
+          : "border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-100"
       )}
       aria-live="polite"
     >
@@ -51,14 +51,14 @@ export function AuditRunningBanner({
           <div className="font-semibold">
             {status === "running" ? "Audit running" : "Audit failed"}
           </div>
-          <div className="mt-0.5 text-xs text-slate-300">
+          <div className="mt-0.5 text-xs text-slate-600 dark:text-slate-300">
             {status === "running"
               ? `Collecting results for audit ${auditId}. This page will refresh automatically.`
               : `Audit ${auditId} failed. You can try running it again.`}
           </div>
         </div>
         {status === "running" ? (
-          <div className="text-xs text-slate-300">
+          <div className="text-xs text-slate-600 dark:text-slate-300">
             {progressValue}/{progressTotal} prompts
           </div>
         ) : null}
@@ -66,11 +66,10 @@ export function AuditRunningBanner({
 
       {status === "running" ? (
         <div className="mt-3 space-y-2">
-          <Progress value={percent} className="bg-slate-800" />
-          <div className="text-xs text-slate-300">{percent}% complete</div>
+          <Progress value={percent} />
+          <div className="text-xs text-slate-600 dark:text-slate-300">{percent}% complete</div>
         </div>
       ) : null}
     </div>
   );
 }
-
