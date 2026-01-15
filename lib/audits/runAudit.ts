@@ -2,7 +2,7 @@ import "server-only";
 
 import { openai } from "@/lib/ai/openaiClient";
 import { getOpenAiModelEnv } from "@/lib/env.server";
-import { analyzeBrandPresence } from "@/lib/ai/analyzeBrandPresence";
+import { analyzeBrandPresence, extractUrls } from "@/lib/ai/analyzeBrandPresence";
 import { classifySourceType, authorityScoreForType } from "@/lib/citations/classifySource";
 import { getActivePromptTemplates } from "@/lib/prompts/getPromptTemplates";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
@@ -87,8 +87,14 @@ function clamp01(value: number) {
   return value;
 }
 
-function safeJsonParse<T>(value: string): T {
-  return JSON.parse(value) as T;
+function safeJsonParse<T>(label: string, value: string): T {
+  try {
+    return JSON.parse(value) as T;
+  } catch (err) {
+    const preview = value.length > 600 ? `${value.slice(0, 600)}…` : value;
+    const message = err instanceof Error ? err.message : "Unknown JSON parse error";
+    throw new Error(`${label}: ${message}. Raw: ${preview}`);
+  }
 }
 
 export async function runAudit(args: {
@@ -138,7 +144,8 @@ export async function runAudit(args: {
   );
   if (upsertAuditError) throw new Error(upsertAuditError.message);
 
-  const failures: Array<{ promptId: string; promptName: string; error: string }> = [];
+  // NOTE: These are prompt processing issues (e.g. OpenAI/JSON/insert failures), not user-facing "recommendations".
+  const issues: Array<{ promptId: string; promptName: string; error: string }> = [];
 
   for (const template of templates) {
     const renderedPrompt = interpolateTemplate(template.prompt_template, {
@@ -161,11 +168,7 @@ export async function runAudit(args: {
 
       const answerText = (mainResponse.output_text ?? "").trim();
 
-      const urlsFromAnswer = analyzeBrandPresence({
-        responseText: answerText,
-        brandName,
-        citations: []
-      }).extractedUrls;
+      const urlsFromAnswer = extractUrls(answerText);
 
       const analysisResponse = await openai.responses.create({
         model: OPENAI_MODEL_ANALYSIS,
@@ -198,13 +201,22 @@ export async function runAudit(args: {
           .join("\n")
       });
 
-      const annotation = safeJsonParse<SelfAnnotation>(analysisResponse.output_text ?? "{}");
+      const annotation = safeJsonParse<SelfAnnotation>(
+        "Failed to parse self-annotation JSON",
+        analysisResponse.output_text ?? ""
+      );
 
       const runId = crypto.randomUUID();
       const executedAt = new Date().toISOString();
       const citationUrls = Array.from(
         new Set([...(annotation.citations ?? []), ...(urlsFromAnswer ?? [])].filter(Boolean))
       );
+
+      const analyzed = analyzeBrandPresence({
+        responseText: answerText,
+        brandName,
+        citations: citationUrls
+      });
 
       const { error: runError } = await supabase.from("ai_prompt_runs").insert({
         id: runId,
@@ -223,12 +235,6 @@ export async function runAudit(args: {
         executed_at: executedAt
       });
       if (runError) throw new Error(runError.message);
-
-      const analyzed = analyzeBrandPresence({
-        responseText: answerText,
-        brandName,
-        citations: citationUrls
-      });
 
       const { error: analysisError } = await supabase.from("ai_prompt_analysis").insert({
         id: crypto.randomUUID(),
@@ -278,12 +284,12 @@ export async function runAudit(args: {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      failures.push({ promptId: template.id, promptName: template.name, error: message });
+      issues.push({ promptId: template.id, promptName: template.name, error: message });
       continue;
     }
   }
 
-  const failuresRatio = failures.length / templates.length;
+  const issuesRatio = issues.length / templates.length;
 
   try {
     // Recommendations are generated once per audit and stored.
@@ -313,12 +319,12 @@ export async function runAudit(args: {
       required: ["items"]
     } as const;
 
-    const promptSummary = failures.length
-      ? `Failures (${failures.length}/${templates.length}):\n${failures
-          .slice(0, 8)
-          .map((f) => `- ${f.promptName}: ${f.error}`)
-          .join("\n")}`
-      : "No prompt failures.";
+    const promptSummary = issues.length
+      ? `Issues (${issues.length}/${templates.length}):\n${issues
+            .slice(0, 8)
+            .map((f) => `- ${f.promptName}: ${f.error}`)
+            .join("\n")}`
+      : "No prompt issues.";
 
     const recResponse = await openai.responses.create({
       model: OPENAI_MODEL_ANALYSIS,
@@ -356,16 +362,7 @@ export async function runAudit(args: {
         impact: "high" | "medium" | "low";
         effort: "high" | "medium" | "low";
       }>;
-    }>(recResponse.output_text ?? "{}") as {
-      items: Array<{
-        category: "content" | "authority" | "structure";
-        title: string;
-        description: string;
-        why_it_matters: string;
-        impact: "high" | "medium" | "low";
-        effort: "high" | "medium" | "low";
-      }>;
-    };
+    }>("Failed to parse recommendations JSON", recResponse.output_text ?? "");
 
     if (recJson.items?.length) {
       const { error: insertRecsError } = await supabase.from("ai_recommendations").insert(
@@ -383,16 +380,17 @@ export async function runAudit(args: {
       );
       if (insertRecsError) throw new Error(insertRecsError.message);
     }
-  } catch {
-    // If recommendation generation fails, keep the audit usable.
+  } catch (err) {
+    // If recommendation generation fails, keep the audit usable, but don't fail silently.
+    console.error("[runAudit] Recommendation generation failed", err);
   }
 
-  const finalStatus = failuresRatio >= 0.5 ? "failed" : "completed";
+  const finalStatus = issuesRatio >= 0.5 ? "failed" : "completed";
   const { error: finishError } = await supabase
     .from("ai_audits")
     .update({ status: finalStatus })
     .eq("id", auditId);
   if (finishError) throw new Error(finishError.message);
 
-  return { auditId, status: finalStatus, failures };
+  return { auditId, status: finalStatus, failures: issues };
 }

@@ -113,16 +113,39 @@ export async function getDashboardData(args?: {
   const requestedAuditId = args?.auditId ?? null;
   const userId = args?.userId ?? null;
 
+  if (!userId) {
+    // Dashboard data must always be scoped to a user when using the admin client.
+    const emptyPrompts: PromptResult[] = templates.map((t) =>
+      toPromptResult(t, {
+        runId: null,
+        executedAt: null,
+        promptAsked: null,
+        answerPreview: null,
+        citationCount: 0,
+        result: fallbackResult
+      })
+    );
+    const summary = calculateSummary(emptyPrompts);
+    const dashboard: DashboardResponse = {
+      audit: { auditId: null, brandName: null, category: null, executedAt: null },
+      summary: { ...summary, visibilityScore: 0, authorityDiversity: 0 },
+      trend: [],
+      prompts: emptyPrompts,
+      recommendations: []
+    };
+    dashboard.recommendations = getRecommendationsFromDashboard(dashboard);
+    return dashboard;
+  }
+
   const auditsQuery = supabase
     .from("ai_audits")
     .select("id,brand_name,created_at,user_id")
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   const { data: latestAudit, error: latestAuditError } = requestedAuditId
     ? await auditsQuery.eq("id", requestedAuditId).maybeSingle()
-    : userId
-      ? await auditsQuery.eq("user_id", userId).limit(1).maybeSingle()
-      : await auditsQuery.limit(1).maybeSingle();
+    : await auditsQuery.limit(1).maybeSingle();
 
   if (latestAuditError) {
     if (!latestAuditError.message.includes("ai_audits") && !latestAuditError.message.includes("relation")) {
