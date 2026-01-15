@@ -100,10 +100,12 @@ function RecommendationIcon({ category }: { category: DemoRecommendationCategory
 
 function EvidenceDrawer({
   item,
-  onClose
+  onClose,
+  demoMode
 }: {
   item: DemoRecommendation;
   onClose: () => void;
+  demoMode?: boolean;
 }) {
   return (
     <div className="fixed inset-0 z-50">
@@ -117,9 +119,11 @@ function EvidenceDrawer({
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-md bg-blue-600/15 px-2 py-0.5 text-xs font-semibold text-blue-300">
-                Sample Data
-              </span>
+              {demoMode ? (
+                <span className="inline-flex items-center rounded-md bg-blue-600/15 px-2 py-0.5 text-xs font-semibold text-blue-300">
+                  Sample Data
+                </span>
+              ) : null}
               <span
                 className={cn(
                   "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold",
@@ -139,7 +143,7 @@ function EvidenceDrawer({
             </div>
             <div className="mt-3 text-xl font-semibold text-white">{item.title}</div>
             <div className="mt-1 text-sm text-slate-400">
-              Evidence is illustrative only and not exportable in demo mode.
+              {demoMode ? "Evidence is illustrative only and not exportable in demo mode." : "Evidence highlights for this recommendation."}
             </div>
           </div>
           <button
@@ -184,7 +188,9 @@ function EvidenceDrawer({
           </div>
 
           <div className="pt-2 text-xs text-slate-500">
-            Demo views display fictional brands and simulated data for illustrative purposes only.
+            {demoMode
+              ? "Demo views display fictional brands and simulated data for illustrative purposes only."
+              : null}
           </div>
         </div>
       </div>
@@ -192,7 +198,13 @@ function EvidenceDrawer({
   );
 }
 
-export function RecommendationsBoard({ data }: { data: DemoRecommendationsData }) {
+export function RecommendationsBoard({
+  data,
+  demoMode
+}: {
+  data: DemoRecommendationsData;
+  demoMode?: boolean;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -221,12 +233,33 @@ export function RecommendationsBoard({ data }: { data: DemoRecommendationsData }
     });
   }, [category, data.items, status]);
 
+  const [updatingId, setUpdatingId] = React.useState<string | null>(null);
+
+  async function startRecommendation(id: string) {
+    if (demoMode) return;
+    setUpdatingId(id);
+    try {
+      const res = await fetch("/api/recommendations", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id, status: "in_progress" })
+      });
+      if (res.ok) {
+        router.refresh();
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Recommendations</h1>
-          <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
+          {demoMode ? (
+            <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
+          ) : null}
         </div>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Actionable insights to improve {data.brandName}&apos;s AI visibility
@@ -336,16 +369,17 @@ export function RecommendationsBoard({ data }: { data: DemoRecommendationsData }
                   </button>
                   <button
                     type="button"
-                    disabled={item.status !== "Pending"}
+                    disabled={demoMode || item.status !== "Pending" || updatingId === item.id}
                     className={cn(
                       "inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium",
-                      item.status === "Pending"
+                      !demoMode && item.status === "Pending" && updatingId !== item.id
                         ? "bg-blue-600 text-white hover:bg-blue-500"
                         : "cursor-not-allowed bg-blue-600/30 text-white/70"
                     )}
-                    title="Demo mode is read-only."
+                    title={demoMode ? "Demo mode is read-only." : "Start tracking this recommendation."}
+                    onClick={() => startRecommendation(item.id)}
                   >
-                    Start
+                    {updatingId === item.id ? "Starting…" : "Start"}
                   </button>
                 </div>
               </div>
@@ -354,7 +388,7 @@ export function RecommendationsBoard({ data }: { data: DemoRecommendationsData }
         ))}
       </div>
 
-      {selected ? <EvidenceDrawer item={selected} onClose={() => setParam("evidence", null)} /> : null}
+      {selected ? <EvidenceDrawer item={selected} demoMode={demoMode} onClose={() => setParam("evidence", null)} /> : null}
     </div>
   );
 }

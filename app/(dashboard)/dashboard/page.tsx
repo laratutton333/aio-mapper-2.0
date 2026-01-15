@@ -7,6 +7,9 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/components/ui/cn";
 import { getDemoDashboardData } from "@/lib/demo/demo-dashboard";
+import { getDashboardData } from "@/lib/dashboard/getDashboardData";
+import { requireUser } from "@/lib/auth/requireUser";
+import { getCompetitorsForAudit } from "@/lib/competitors/getCompetitorsForAudit";
 
 function formatPercent(value: number) {
   return `${Math.round(value * 100)}%`;
@@ -101,30 +104,48 @@ export default async function DashboardOverviewPage({
 }) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const isDemo = resolvedSearchParams.demo === "true";
-  const demo = isDemo ? getDemoDashboardData() : null;
-  const brandName = demo?.audit.brandName ?? "your brand";
+  const auditIdParam =
+    typeof resolvedSearchParams.audit_id === "string" ? resolvedSearchParams.audit_id : null;
 
-  const metrics = demo
+  const demo = isDemo ? getDemoDashboardData() : null;
+
+  const user = isDemo ? null : await requireUser();
+  const dashboard = isDemo ? null : await getDashboardData({ auditId: auditIdParam, userId: user?.id });
+
+  const data = demo ?? dashboard;
+  const brandName = data?.audit.brandName ?? "your brand";
+
+  const competitors =
+    isDemo
+      ? demo?.demo.competitors ?? []
+      : dashboard?.audit.auditId
+        ? await getCompetitorsForAudit({
+            auditId: dashboard.audit.auditId,
+            primaryBrandName: dashboard.audit.brandName
+          })
+        : [];
+
+  const metrics = data
     ? [
         {
           label: "VISIBILITY SCORE",
-          value: formatPercent(demo.summary.visibilityScore),
-          delta: demo.demo.deltas.visibilityScore
+          value: formatPercent(data.summary.visibilityScore),
+          delta: demo?.demo.deltas.visibilityScore ?? 0
         },
         {
           label: "PRESENCE RATE",
-          value: formatPercent(demo.summary.presenceRate),
-          delta: demo.demo.deltas.presenceRate
+          value: formatPercent(data.summary.presenceRate),
+          delta: demo?.demo.deltas.presenceRate ?? 0
         },
         {
           label: "CITATION RATE",
-          value: formatPercent(demo.summary.citationRate),
-          delta: demo.demo.deltas.citationRate
+          value: formatPercent(data.summary.citationRate),
+          delta: demo?.demo.deltas.citationRate ?? 0
         },
         {
           label: "RECOMMENDATION RATE",
-          value: formatPercent(demo.summary.recommendationRate),
-          delta: demo.demo.deltas.recommendationRate
+          value: formatPercent(data.summary.recommendationRate),
+          delta: demo?.demo.deltas.recommendationRate ?? 0
         }
       ]
     : [
@@ -149,7 +170,7 @@ export default async function DashboardOverviewPage({
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             {isDemo
               ? `Track how ${brandName} appears across AI-generated answers`
-              : "UI-only: data wiring will be added later."}
+              : `Track how ${brandName} appears across AI-generated answers`}
           </p>
         </div>
 
@@ -161,13 +182,12 @@ export default async function DashboardOverviewPage({
             Refresh
           </Link>
 
-          <button
-            type="button"
-            disabled={isDemo}
+          <Link
             className={cn(
               "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-white",
-              isDemo ? "cursor-not-allowed bg-blue-600/40" : "bg-blue-600 hover:bg-blue-500"
+              isDemo ? "cursor-not-allowed bg-blue-600/40 pointer-events-none" : "bg-blue-600 hover:bg-blue-500"
             )}
+            href={isDemo ? "/account" : "#run-audit"}
             title={
               isDemo
                 ? "Demo mode uses sample data only. Running a real audit requires an account."
@@ -175,7 +195,7 @@ export default async function DashboardOverviewPage({
             }
           >
             Run Audit
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -189,7 +209,7 @@ export default async function DashboardOverviewPage({
             </CardHeader>
             <div className="mt-1 text-3xl font-semibold">{metric.value}</div>
             <div className="mt-2">
-              {isDemo ? <DeltaPill value={metric.delta} /> : <CardDescription>—</CardDescription>}
+              {data ? <DeltaPill value={metric.delta} /> : <CardDescription>—</CardDescription>}
             </div>
           </Card>
         ))}
@@ -200,11 +220,11 @@ export default async function DashboardOverviewPage({
           <CardHeader>
             <CardTitle>Visibility Score Trend</CardTitle>
             <CardDescription className="text-xs">
-              {isDemo ? "Illustrative example — not real measurements." : "UI-only placeholder."}
+              {isDemo ? "Illustrative example — not real measurements." : "Latest audits over time."}
             </CardDescription>
           </CardHeader>
           <div className="mt-4">
-            <Sparkline values={demo ? demo.trend.map((t) => t.visibilityScore) : []} />
+            <Sparkline values={data ? data.trend.map((t) => t.visibilityScore) : []} />
           </div>
         </Card>
 
@@ -214,12 +234,12 @@ export default async function DashboardOverviewPage({
           </CardHeader>
           <div className="mt-4 space-y-4">
             {(
-              demo
+              data
                 ? [
-                    { label: "Presence", value: demo.summary.presenceRate },
-                    { label: "Citations", value: demo.summary.citationRate },
-                    { label: "Recommendations", value: demo.summary.recommendationRate },
-                    { label: "Authority Diversity", value: demo.summary.authorityDiversity }
+                    { label: "Presence", value: data.summary.presenceRate },
+                    { label: "Citations", value: data.summary.citationRate },
+                    { label: "Recommendations", value: data.summary.recommendationRate },
+                    { label: "Authority Diversity", value: data.summary.authorityDiversity }
                   ]
                 : [
                     { label: "Presence", value: 0 },
@@ -232,7 +252,7 @@ export default async function DashboardOverviewPage({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-700 dark:text-slate-300">{row.label}</span>
                   <span className="text-slate-600 dark:text-slate-400">
-                    {demo ? formatPercent(row.value) : "—"}
+                    {data ? formatPercent(row.value) : "—"}
                   </span>
                 </div>
                 <div className="mt-2">
@@ -250,17 +270,18 @@ export default async function DashboardOverviewPage({
             <div>
               <CardTitle>Recent Prompt Results</CardTitle>
               <CardDescription className="text-xs">
-                {isDemo ? "Sample runs for illustration." : "TODO: render latest prompt runs."}
+                {isDemo ? "Sample runs for illustration." : "Latest prompt runs for the selected audit."}
               </CardDescription>
             </div>
-            {isDemo ? (
-              <Link href="/dashboard/runs?demo=true" className="text-sm text-slate-300 hover:text-white">
-                View All →
-              </Link>
-            ) : null}
+            <Link
+              href={isDemo ? "/dashboard/runs?demo=true" : "/dashboard/runs"}
+              className="text-sm text-slate-300 hover:text-white"
+            >
+              View All →
+            </Link>
           </CardHeader>
 
-          {demo ? (
+          {data ? (
             <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 text-xs text-slate-600 dark:bg-slate-950 dark:text-slate-400">
@@ -273,7 +294,7 @@ export default async function DashboardOverviewPage({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-900 dark:bg-slate-950">
-                  {demo.prompts.slice(0, 6).map((row) => (
+                  {data.prompts.slice(0, 6).map((row) => (
                     <tr key={row.promptId} className="hover:bg-slate-50 dark:hover:bg-slate-900/40">
                       <td className="px-4 py-4 text-slate-900 dark:text-slate-100">
                         {row.promptName}
@@ -288,7 +309,16 @@ export default async function DashboardOverviewPage({
                         <PresenceBadge brandName={brandName} mentionType={row.result.mentionType} />
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <span className="text-xs text-slate-500">View</span>
+                        {row.runId ? (
+                          <Link
+                            href={isDemo ? `/dashboard/runs?demo=true&run=${row.runId}` : `/dashboard/runs?run=${row.runId}`}
+                            className="text-xs text-slate-500 hover:text-slate-200"
+                          >
+                            View
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-slate-500">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -308,7 +338,7 @@ export default async function DashboardOverviewPage({
             <CardDescription>
               {isDemo
                 ? "Demo mode is read-only. Create an account to run a real audit."
-                : "UI-only: hook this up to your existing backend."}
+                : "Run a new audit and save results to your dashboard."}
             </CardDescription>
           </CardHeader>
           <div className={cn("mt-4", isDemo ? "opacity-50 pointer-events-none" : "")}>
@@ -330,51 +360,61 @@ export default async function DashboardOverviewPage({
         </Card>
       </div>
 
-      {demo ? (
+      {data ? (
         <div className="grid gap-4 lg:grid-cols-2">
           <Card>
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle>Competitors Tracked</CardTitle>
               <span className="rounded-md bg-slate-900 px-2 py-0.5 text-xs text-slate-200">
-                {demo.demo.competitors.length}
+                {competitors.length}
               </span>
             </CardHeader>
             <div className="mt-4 space-y-2">
-              {demo.demo.competitors.map((brand) => (
-                <div
-                  key={brand.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-900 dark:bg-slate-950"
-                >
-                  <div>
-                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {brand.name}
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">{brand.domain}</div>
-                  </div>
-                  <button
-                    type="button"
-                    className="rounded-md border border-slate-800 bg-slate-950/40 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-900"
-                    disabled
-                    title="Demo mode is read-only."
+              {competitors.map((brand) => (
+                  <div
+                    key={brand.id}
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-900 dark:bg-slate-950"
                   >
-                    Compare
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        {brand.name}
+                      </div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">{brand.domain ?? "—"}</div>
+                    </div>
+                    <button
+                      type="button"
+                      className="rounded-md border border-slate-800 bg-slate-950/40 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-900"
+                      disabled
+                      title={isDemo ? "Demo mode is read-only." : "Competitor comparisons are read-only in this view."}
+                    >
+                      Compare
+                    </button>
+                  </div>
+                ))}
             </div>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Audit Summary</CardTitle>
-              <CardDescription className="text-xs">Sample data for illustration.</CardDescription>
+              <CardDescription className="text-xs">
+                {isDemo ? "Sample data for illustration." : "Summary for the selected audit."}
+              </CardDescription>
             </CardHeader>
             <div className="mt-4 space-y-3 text-sm">
               {[
-                { label: "Total Prompts", value: String(demo.demo.totalPrompts) },
-                { label: "Completed", value: String(demo.demo.completedPrompts) },
-                { label: "Audit Name", value: demo.demo.auditName },
-                { label: "Category", value: demo.audit.category ?? "—", pill: true }
+                {
+                  label: "Total Prompts",
+                  value: String(isDemo ? demo!.demo.totalPrompts : data.prompts.length)
+                },
+                {
+                  label: "Completed",
+                  value: String(
+                    isDemo ? demo!.demo.completedPrompts : data.prompts.filter((p) => p.runId).length
+                  )
+                },
+                { label: "Audit Name", value: isDemo ? demo!.demo.auditName : "AI Visibility Audit" },
+                { label: "Category", value: data.audit.category ?? "—", pill: true }
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between gap-4">
                   <div className="text-slate-600 dark:text-slate-400">{row.label}</div>

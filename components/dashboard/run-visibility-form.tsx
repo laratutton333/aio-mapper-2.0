@@ -16,8 +16,23 @@ export function RunVisibilityForm() {
     setMessage(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      setMessage("TODO: wire this form to your existing audit/run backend.");
+      const auditId = crypto.randomUUID();
+
+      // Fire-and-forget: don't block the UI while the server runs the audit.
+      void fetch("/api/audits/run", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          audit_id: auditId,
+          brand_name: brandName,
+          category: category || null
+        })
+      });
+
+      window.location.href = `/dashboard?audit_id=${encodeURIComponent(auditId)}`;
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Unable to run audit.");
     } finally {
       setIsRunning(false);
     }
@@ -51,4 +66,3 @@ export function RunVisibilityForm() {
     </form>
   );
 }
-

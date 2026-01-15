@@ -113,13 +113,15 @@ function TripleBarRow({ row }: { row: BrandMetrics }) {
   );
 }
 
-function OverviewCharts({ data }: { data: BrandVsCompetitorsData }) {
+function OverviewCharts({ data, demoMode }: { data: BrandVsCompetitorsData; demoMode?: boolean }) {
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle>AI Visibility Comparison</CardTitle>
-          <CardDescription className="text-xs">Illustrative example — not real measurements.</CardDescription>
+          <CardDescription className="text-xs">
+            {demoMode ? "Illustrative example — not real measurements." : "Comparison across your brand and competitors."}
+          </CardDescription>
         </CardHeader>
         <div className="mt-4 space-y-6">
           {data.brands.map((row) => (
@@ -133,7 +135,9 @@ function OverviewCharts({ data }: { data: BrandVsCompetitorsData }) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <span className="text-slate-300">Share of AI Recommendations</span>
-            <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
+            {demoMode ? (
+              <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
+            ) : null}
           </div>
         </CardHeader>
         <div className="mt-4 space-y-4">
@@ -173,7 +177,7 @@ function IntentCard({ title, rows }: { title: IntentGroup; rows: BrandMetrics[] 
   );
 }
 
-function DetailedTable({ data }: { data: BrandVsCompetitorsData }) {
+function DetailedTable({ data, demoMode }: { data: BrandVsCompetitorsData; demoMode?: boolean }) {
   const rows = data.brands
     .slice()
     .sort((a, b) => overallScore(b) - overallScore(a))
@@ -186,7 +190,9 @@ function DetailedTable({ data }: { data: BrandVsCompetitorsData }) {
     <Card>
       <CardHeader>
         <CardTitle>Detailed Metrics Comparison</CardTitle>
-        <CardDescription className="text-xs">Sample data for illustration.</CardDescription>
+        <CardDescription className="text-xs">
+          {demoMode ? "Sample data for illustration." : "Per-brand metrics derived from stored audit results."}
+        </CardDescription>
       </CardHeader>
 
       <div className="mt-4 overflow-x-auto">
@@ -230,9 +236,11 @@ function DetailedTable({ data }: { data: BrandVsCompetitorsData }) {
 }
 
 export function BrandVsCompetitors({
-  data
+  data,
+  demoMode
 }: {
   data: BrandVsCompetitorsData;
+  demoMode?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -279,7 +287,9 @@ export function BrandVsCompetitors({
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">Brand vs Competitors</h1>
-          <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
+          {demoMode ? (
+            <Badge className="border-slate-800 bg-slate-900 text-slate-200">Sample Data</Badge>
+          ) : null}
         </div>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Compare AI visibility metrics across your brand and competitors
@@ -318,7 +328,7 @@ export function BrandVsCompetitors({
       </div>
 
       {view === "overview" ? (
-        <OverviewCharts data={data} />
+        <OverviewCharts data={data} demoMode={demoMode} />
       ) : view === "intent" ? (
         <div className="grid gap-4 xl:grid-cols-2">
           {(Object.keys(data.byIntent) as IntentGroup[]).map((intent) => (
@@ -326,7 +336,7 @@ export function BrandVsCompetitors({
           ))}
         </div>
       ) : (
-        <DetailedTable data={data} />
+        <DetailedTable data={data} demoMode={demoMode} />
       )}
     </div>
   );

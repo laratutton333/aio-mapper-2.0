@@ -8,6 +8,9 @@ import {
   getDemoCitationsData,
   type DemoCitationType
 } from "@/lib/demo/demo-citations";
+import { requireUser } from "@/lib/auth/requireUser";
+import { getDashboardData } from "@/lib/dashboard/getDashboardData";
+import { getCitationsReport } from "@/lib/citations/getCitationsReport";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -104,7 +107,63 @@ export default async function DashboardCitationsPage({
 }) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const isDemo = resolvedSearchParams.demo === "true";
+  const auditIdParam =
+    typeof resolvedSearchParams.audit_id === "string" ? resolvedSearchParams.audit_id : null;
+
   const demo = isDemo ? getDemoCitationsData() : null;
+
+  const user = isDemo ? null : await requireUser();
+  const dashboard = isDemo ? null : await getDashboardData({ auditId: auditIdParam, userId: user?.id });
+  const report =
+    !isDemo && dashboard?.audit.auditId
+      ? await getCitationsReport({ auditId: dashboard.audit.auditId, brandName: dashboard.audit.brandName })
+      : null;
+
+  const live = report
+    ? (() => {
+        const mapType = (t: string): DemoCitationType => {
+          if (t === "brand_owned") return "brand_owned";
+          if (t === "wikipedia") return "wikipedia";
+          if (t === "government") return "government";
+          if (t === "competitor") return "competitor";
+          if (t === "publisher") return "publisher";
+          return "publisher";
+        };
+
+        const rows = report.all.map((row) => ({
+          url: row.url,
+          type: mapType(row.sourceType),
+          domain: row.domain ?? row.url,
+          authority: Math.round(row.authorityScore * 100)
+        }));
+
+        const totalCitations = report.totalCitations;
+        const byType = (["brand_owned", "wikipedia", "publisher", "competitor", "government"] as DemoCitationType[]).map(
+          (type) => {
+            const count = rows.filter((r) => r.type === type).length;
+            return {
+              type,
+              label: citationTypeLabel(type),
+              count,
+              percent: totalCitations === 0 ? 0 : count / totalCitations
+            };
+          }
+        );
+
+        return {
+          totals: {
+            totalCitations: report.totalCitations,
+            brandOwnedRate: report.brandOwnedRate,
+            averageAuthority: report.averageAuthorityScore * 100,
+            missingCitations: report.missingCitationsCount
+          },
+          byType,
+          rows
+        };
+      })()
+    : null;
+
+  const data = demo ?? live;
 
   return (
     <div className="flex flex-col gap-6">
@@ -123,7 +182,7 @@ export default async function DashboardCitationsPage({
             </CardTitle>
           </CardHeader>
           <div className="mt-1 text-3xl font-semibold text-slate-100">
-            {demo ? demo.totals.totalCitations : "—"}
+            {data ? data.totals.totalCitations : "—"}
           </div>
           <CardDescription className="mt-2">across all prompts</CardDescription>
         </Card>
@@ -135,10 +194,10 @@ export default async function DashboardCitationsPage({
             </CardTitle>
           </CardHeader>
           <div className="mt-1 text-3xl font-semibold text-slate-100">
-            {demo ? percent(demo.totals.brandOwnedRate) : "—"}
+            {data ? percent(data.totals.brandOwnedRate) : "—"}
           </div>
           <div className="mt-3">
-            <Progress value={demo ? Math.round(demo.totals.brandOwnedRate * 100) : 0} className="bg-slate-800" />
+            <Progress value={data ? Math.round(data.totals.brandOwnedRate * 100) : 0} className="bg-slate-800" />
           </div>
         </Card>
 
@@ -149,19 +208,19 @@ export default async function DashboardCitationsPage({
             </CardTitle>
           </CardHeader>
           <div className="mt-1 text-3xl font-semibold text-slate-100">
-            {demo ? `${Math.round(demo.totals.averageAuthority)}%` : "—"}
+            {data ? `${Math.round(data.totals.averageAuthority)}%` : "—"}
           </div>
           <CardDescription className="mt-2">average across sources</CardDescription>
         </Card>
 
-        <Card className={cn("border-slate-200 dark:border-slate-900", demo ? "border-amber-500/40" : "")}>
+        <Card className={cn("border-slate-200 dark:border-slate-900", data ? "border-amber-500/40" : "")}>
           <CardHeader>
             <CardTitle className="text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-400">
               MISSING CITATIONS
             </CardTitle>
           </CardHeader>
           <div className="mt-1 text-3xl font-semibold text-slate-100">
-            {demo ? demo.totals.missingCitations : "—"}
+            {data ? data.totals.missingCitations : "—"}
           </div>
           <CardDescription className="mt-2">prompts without sources</CardDescription>
         </Card>
@@ -172,26 +231,26 @@ export default async function DashboardCitationsPage({
           <CardHeader>
             <CardTitle>Citation Distribution by Type</CardTitle>
             <CardDescription className="text-xs">
-              {demo ? "Illustrative example — not real measurements." : "UI-only placeholder."}
+              {isDemo ? "Illustrative example — not real measurements." : "Distribution derived from stored audit results."}
             </CardDescription>
           </CardHeader>
-          {demo ? (
+          {data ? (
             <div className="mt-6 grid gap-6 md:grid-cols-12 md:items-center">
               <div className="md:col-span-7">
                 <DonutChart
                   segments={[
-                    { label: "Brand Owned", value: demo.byType.find((t) => t.type === "brand_owned")?.percent ?? 0, color: "#3b82f6" },
-                    { label: "Wikipedia", value: demo.byType.find((t) => t.type === "wikipedia")?.percent ?? 0, color: "#94a3b8" },
-                    { label: "Publisher", value: demo.byType.find((t) => t.type === "publisher")?.percent ?? 0, color: "#6366f1" },
-                    { label: "Competitor", value: demo.byType.find((t) => t.type === "competitor")?.percent ?? 0, color: "#f59e0b" },
-                    { label: "Government", value: demo.byType.find((t) => t.type === "government")?.percent ?? 0, color: "#34d399" }
+                    { label: "Brand Owned", value: data.byType.find((t) => t.type === "brand_owned")?.percent ?? 0, color: "#3b82f6" },
+                    { label: "Wikipedia", value: data.byType.find((t) => t.type === "wikipedia")?.percent ?? 0, color: "#94a3b8" },
+                    { label: "Publisher", value: data.byType.find((t) => t.type === "publisher")?.percent ?? 0, color: "#6366f1" },
+                    { label: "Competitor", value: data.byType.find((t) => t.type === "competitor")?.percent ?? 0, color: "#f59e0b" },
+                    { label: "Government", value: data.byType.find((t) => t.type === "government")?.percent ?? 0, color: "#34d399" }
                   ]}
                 />
               </div>
 
               <div className="md:col-span-5">
                 <div className="space-y-2 text-sm">
-                  {demo.byType.map((row) => (
+                  {data.byType.map((row) => (
                     <div key={row.type} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 text-slate-300">
                         <span className="h-2 w-2 rounded-full" style={{ backgroundColor: typeColor(row.type) }} />
@@ -225,12 +284,12 @@ export default async function DashboardCitationsPage({
           <CardHeader>
             <CardTitle>Source Type Analysis</CardTitle>
             <CardDescription className="text-xs">
-              {demo ? "How citations break down across source types." : "UI-only placeholder."}
+              {isDemo ? "How citations break down across source types." : "How citations break down across source types."}
             </CardDescription>
           </CardHeader>
-          {demo ? (
+          {data ? (
             <div className="mt-4 space-y-3">
-              {demo.byType.map((row) => (
+              {data.byType.map((row) => (
                 <div
                   key={row.type}
                   className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900"
@@ -275,7 +334,7 @@ export default async function DashboardCitationsPage({
         <CardHeader>
           <CardTitle>All Citations</CardTitle>
           <CardDescription className="text-xs">
-            {demo ? "Sample citations extracted from demo prompts." : "TODO: render citation rows."}
+            {isDemo ? "Sample citations extracted from demo prompts." : "Citations extracted from audit prompt runs."}
           </CardDescription>
         </CardHeader>
         <div className="mt-4 overflow-x-auto">
@@ -289,8 +348,8 @@ export default async function DashboardCitationsPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-900">
-              {demo ? (
-                demo.rows.map((row) => (
+              {data ? (
+                data.rows.map((row) => (
                   <tr key={row.url} className="hover:bg-slate-50 dark:hover:bg-slate-900/40">
                     <td className="py-4 pr-4">
                       <a
@@ -333,7 +392,7 @@ export default async function DashboardCitationsPage({
         </div>
       </Card>
 
-      {demo ? (
+      {data ? (
         <Card className="border-amber-500/40 bg-amber-500/5">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -342,7 +401,7 @@ export default async function DashboardCitationsPage({
             </div>
           </CardHeader>
           <CardDescription>
-            {demo.totals.missingCitations} prompt generated answers without citing any sources. This may
+            {data.totals.missingCitations} prompt generated answers without citing any sources. This may
             indicate opportunities to improve content discoverability or authority signals.
           </CardDescription>
         </Card>

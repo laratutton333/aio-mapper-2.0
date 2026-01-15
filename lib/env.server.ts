@@ -3,6 +3,8 @@ import "server-only";
 type ServerEnvName =
   | "SUPABASE_SERVICE_ROLE_KEY"
   | "OPENAI_API_KEY"
+  | "OPENAI_MODEL_MAIN"
+  | "OPENAI_MODEL_ANALYSIS"
   | "STRIPE_SECRET_KEY"
   | "STRIPE_WEBHOOK_SECRET"
   | "DATABASE_URL";
@@ -24,6 +26,13 @@ export function getSupabaseServiceRoleEnv() {
 export function getOpenAiEnv() {
   return {
     OPENAI_API_KEY: requireServerEnv("OPENAI_API_KEY")
+  };
+}
+
+export function getOpenAiModelEnv() {
+  return {
+    OPENAI_MODEL_MAIN: requireServerEnv("OPENAI_MODEL_MAIN"),
+    OPENAI_MODEL_ANALYSIS: requireServerEnv("OPENAI_MODEL_ANALYSIS")
   };
 }
 
