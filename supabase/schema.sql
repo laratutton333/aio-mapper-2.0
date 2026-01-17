@@ -44,6 +44,7 @@ create table if not exists public.ai_audits (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null,
   brand_name text not null,
+  category text null,
   primary_domain text null,
   status text not null default 'completed',
   created_at timestamp with time zone default now(),
@@ -52,6 +53,9 @@ create table if not exists public.ai_audits (
     references auth.users (id)
     on delete cascade
 );
+
+alter table public.ai_audits
+  add column if not exists category text null;
 
 alter table public.ai_audits
   drop constraint if exists ai_audits_status_allowed;

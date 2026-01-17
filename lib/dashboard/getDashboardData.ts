@@ -139,7 +139,7 @@ export async function getDashboardData(args?: {
 
   const auditsQuery = supabase
     .from("ai_audits")
-    .select("id,brand_name,created_at,user_id")
+    .select("id,brand_name,category,created_at,user_id")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -179,7 +179,7 @@ export async function getDashboardData(args?: {
 
   const auditId = (latestAudit?.id as string | null) ?? null;
   const brandName = (latestAudit?.brand_name as string | null) ?? null;
-  const category = null;
+  const category = (latestAudit?.category as string | null) ?? null;
   const executedAt = (latestAudit?.created_at as string | null) ?? null;
 
   if (!auditId) {

@@ -137,6 +137,7 @@ export async function runAudit(args: {
       id: auditId,
       user_id: args.userId,
       brand_name: brandName,
+      category,
       primary_domain: primaryDomain,
       status: "running"
     },

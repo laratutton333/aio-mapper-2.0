@@ -7,8 +7,40 @@ import { Button } from "@/components/ui/button";
 export function RunVisibilityForm() {
   const [brandName, setBrandName] = React.useState<string>("");
   const [category, setCategory] = React.useState<string>("");
+  const [primaryDomain, setPrimaryDomain] = React.useState<string>("");
   const [isRunning, setIsRunning] = React.useState<boolean>(false);
   const [message, setMessage] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("demo") === "true") return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/user/config");
+        if (!res.ok) return;
+        const json = (await res.json()) as { config?: { brand_name?: string | null; primary_domain?: string | null } };
+        if (cancelled) return;
+
+        const savedBrandName = (json.config?.brand_name ?? "").trim();
+        const savedDomain = (json.config?.primary_domain ?? "").trim();
+
+        if (savedBrandName) {
+          setBrandName((prev) => (prev.trim() ? prev : savedBrandName));
+        }
+        if (savedDomain) {
+          setPrimaryDomain((prev) => (prev.trim() ? prev : savedDomain));
+        }
+      } catch {
+        // ignore
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -26,7 +58,8 @@ export function RunVisibilityForm() {
         body: JSON.stringify({
           audit_id: auditId,
           brand_name: brandName,
-          category: category || null
+          category: category || null,
+          primary_domain: primaryDomain || null
         })
       });
 
