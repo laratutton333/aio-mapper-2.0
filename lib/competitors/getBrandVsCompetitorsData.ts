@@ -3,6 +3,7 @@ import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { BrandVsCompetitorsData, IntentGroup } from "@/lib/demo/demo-brand-vs-competitors";
 import type { DemoBrand } from "@/lib/demo/demo-brands";
+import { getSavedCompetitorsForUser } from "@/lib/competitors/getSavedCompetitorsForUser";
 
 type MentionType = "primary" | "secondary" | "implied" | "none";
 type Mention = { brand: string; type: MentionType };
@@ -60,6 +61,8 @@ export async function getBrandVsCompetitorsData(args: { auditId: string; userId:
   if ((audit.user_id as string) !== args.userId) return null;
 
   const primaryBrandName = (audit.brand_name as string) ?? "Your brand";
+  const savedCompetitors = await getSavedCompetitorsForUser(args.userId);
+  const hasSavedCompetitors = savedCompetitors.length > 0;
 
   const { data: runs, error: runsError } = await supabase
     .from("ai_prompt_runs")
@@ -137,22 +140,30 @@ export async function getBrandVsCompetitorsData(args: { auditId: string; userId:
     if (runId) hasCitations.add(runId);
   }
 
-  const competitorPresenceCounts = new Map<string, number>();
-  for (const runId of runIds) {
-    const mentions = mentionsByRunId.get(runId) ?? [];
-    for (const mention of mentions) {
-      const name = mention.brand.trim();
-      if (!name) continue;
-      if (name.toLowerCase() === primaryBrandName.toLowerCase()) continue;
-      if (mention.type === "none") continue;
-      competitorPresenceCounts.set(name, (competitorPresenceCounts.get(name) ?? 0) + 1);
-    }
-  }
+  const competitors = hasSavedCompetitors
+    ? savedCompetitors
+        .filter((c) => c.name.trim().length > 0)
+        .filter((c) => c.name.trim().toLowerCase() !== primaryBrandName.toLowerCase())
+        .slice(0, 10)
+        .map((c) => buildBrand(c.name, null, c.domain))
+    : (() => {
+        const competitorPresenceCounts = new Map<string, number>();
+        for (const runId of runIds) {
+          const mentions = mentionsByRunId.get(runId) ?? [];
+          for (const mention of mentions) {
+            const name = mention.brand.trim();
+            if (!name) continue;
+            if (name.toLowerCase() === primaryBrandName.toLowerCase()) continue;
+            if (mention.type === "none") continue;
+            competitorPresenceCounts.set(name, (competitorPresenceCounts.get(name) ?? 0) + 1);
+          }
+        }
 
-  const competitors = Array.from(competitorPresenceCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([name]) => buildBrand(name, null, null));
+        return Array.from(competitorPresenceCounts.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([name]) => buildBrand(name, null, null));
+      })();
 
   const primary = buildBrand(primaryBrandName, null, (audit.primary_domain as string | null) ?? null);
   const allBrands: DemoBrand[] = [primary, ...competitors];
@@ -209,7 +220,7 @@ export async function getBrandVsCompetitorsData(args: { auditId: string; userId:
   return {
     primary,
     brands: computeMetrics(runIds),
-    byIntent
+    byIntent,
+    competitorsSource: hasSavedCompetitors ? "settings" : "inferred"
   };
 }
-

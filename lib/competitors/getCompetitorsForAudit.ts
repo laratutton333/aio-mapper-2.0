@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { getSavedCompetitorsForUser } from "@/lib/competitors/getSavedCompetitorsForUser";
 
 type Mention = { brand: string; type: string };
 
@@ -9,6 +10,40 @@ export async function getCompetitorsForAudit(args: {
   primaryBrandName: string | null;
 }) {
   const supabase = createSupabaseAdminClient();
+
+  const { data: audit, error: auditError } = await supabase
+    .from("ai_audits")
+    .select("user_id")
+    .eq("id", args.auditId)
+    .maybeSingle();
+  if (auditError) throw new Error(auditError.message);
+
+  const auditUserId = (audit?.user_id as string | null) ?? null;
+  if (auditUserId) {
+    const savedCompetitors = await getSavedCompetitorsForUser(auditUserId);
+    const primaryLower = args.primaryBrandName?.trim().toLowerCase() ?? null;
+    const seen = new Set<string>();
+
+    const rows = savedCompetitors
+      .map((c) => ({ name: c.name.trim(), domain: c.domain }))
+      .filter((c) => c.name.length > 0)
+      .filter((c) => (primaryLower ? c.name.toLowerCase() !== primaryLower : true))
+      .filter((c) => {
+        const key = c.name.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+    if (rows.length > 0) {
+      return rows.slice(0, 10).map((row) => ({
+        id: `competitor-settings-${row.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        name: row.name,
+        domain: row.domain,
+        source: "settings" as const
+      }));
+    }
+  }
 
   const { data: runs, error: runsError } = await supabase
     .from("ai_prompt_runs")
@@ -53,6 +88,7 @@ export async function getCompetitorsForAudit(args: {
     .map((name) => ({
       id: `competitor-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
       name,
-      domain: null as string | null
+      domain: null as string | null,
+      source: "inferred" as const
     }));
 }

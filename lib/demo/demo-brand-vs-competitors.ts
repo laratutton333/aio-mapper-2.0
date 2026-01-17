@@ -14,6 +14,7 @@ export type BrandVsCompetitorsData = {
   primary: DemoBrand;
   brands: BrandMetrics[];
   byIntent: Record<IntentGroup, BrandMetrics[]>;
+  competitorsSource?: "settings" | "inferred";
 };
 
 function overallScore(metrics: BrandMetrics) {
@@ -91,4 +92,3 @@ export function getDemoComparisonSummary(data: BrandVsCompetitorsData) {
     }))
   };
 }
-
